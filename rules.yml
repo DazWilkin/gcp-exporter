@@ -1,15 +1,15 @@
 groups:
   - name: GCP
     rules:
-      - alert: GCP_Instances
-        expr: gcp_compute_engine_instances > 0
+      - alert: GCPInstancesRunning
+        expr: gcp_compute_engine_instances{} > 0
         for: 60m
         labels:
           severity: page
         annotations:
           summary: GCP Compute Engine Instances running
-      - alert: GCP_K8s_Clusters
-        expr: gcp_kubernetes_engine_up > 0
+      - alert: GCPKubernetesClustersRunning
+        expr: gcp_kubernetes_engine_cluster_up{} > 0
         for: 60m
         labels:
           severity: page
