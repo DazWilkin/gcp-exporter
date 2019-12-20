@@ -1,14 +1,14 @@
 groups:
   - name: GCP
     rules:
-      - alert: GCP-Instances
+      - alert: GCP_Instances
         expr: gcp_compute_engine_instances > 0
         for: 60m
         labels:
           severity: page
         annotations:
           summary: GCP Compute Engine Instances running
-      - alert: GCP-K8s-Clusters
+      - alert: GCP_K8s_Clusters
         expr: gcp_kubernetes_engine_up > 0
         for: 60m
         labels:
