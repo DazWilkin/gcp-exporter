@@ -26,7 +26,7 @@ services:
     container_name: prometheus
     volumes:
       - ${PWD}/prometheus.yml:/etc/prometheus/prometheus.yml
-      - ${PWD}/rules.yaml:/etc/alertmanager/rules.yml
+      - ${PWD}/rules.yml:/etc/alertmanager/rules.yml
     expose:
       - "9090"
     ports:
