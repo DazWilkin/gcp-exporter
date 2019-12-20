@@ -15,6 +15,8 @@ Result:
 And:
 
 ![](./images/alertmanager.quiet.png)
+![](./images/alertmanager.firing.png)
+![](./images/gmail.png)
 
 ## Installation
 
