@@ -26,7 +26,7 @@ func NewExporterCollector(osVersion, goVersion, gitCommit string, startTime int6
 
 		StartTime: prometheus.NewDesc(
 			fqName("start_time"),
-			"start time in Unix epoch seconds",
+			"Exporter start time in Unix epoch seconds",
 			nil,
 			nil,
 		),
