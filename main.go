@@ -1,0 +1,107 @@
+package main
+
+import (
+	"context"
+	"flag"
+	"fmt"
+	"log"
+	"net/http"
+	"os"
+	"runtime"
+	"time"
+
+	"google.golang.org/api/cloudresourcemanager/v1"
+
+	"github.com/DazWilkin/gcp-exporter/collector"
+
+	"github.com/prometheus/client_golang/prometheus"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
+
+	"golang.org/x/oauth2/google"
+)
+
+var (
+	// GitCommit is the git commit value and is expected to be set during build
+	GitCommit string
+	// GoVersion is the Golang runtime version
+	GoVersion = runtime.Version()
+	// OSVersion is the OS version (uname --kernel-release) and is expected to be set during build
+	OSVersion string
+	// StartTime is the start time of the exporter represented as a UNIX epoch
+	StartTime = time.Now().Unix()
+)
+var (
+	filter      = flag.String("filter", "", "Filter the results of the request")
+	pagesize    = flag.Int64("max_projects", 10, "Maximum number of projects to include")
+	endpoint    = flag.String("endpoint", ":9402", "The endpoint of the HTTP server")
+	metricsPath = flag.String("path", "/metrics", "The path on which Prometheus metrics will be served")
+)
+
+func rootHandler(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "text/html; charset=UTF-8")
+	fmt.Fprint(w, "<h2>Google Cloud Platform Resources Exporter</h2>")
+	fmt.Fprintf(w, "<a href=\"%s\">metrics</a>", *metricsPath)
+}
+func main() {
+	flag.Parse()
+
+	if GitCommit == "" {
+		log.Println("[main] GitCommit value unchanged: expected to be set during build")
+	}
+	if OSVersion == "" {
+		log.Println("[main] OSVersion value unchanged: expected to be set during build")
+	}
+
+	registry := prometheus.NewRegistry()
+
+	ctx := context.Background()
+
+	client, err := google.DefaultClient(ctx, "https://www.googleapis.com/auth/cloud-platform")
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	cloudresourcemanagerService, err := cloudresourcemanager.New(client)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	// Create the Projects.List request
+	// Return at most (!) '--pagesize' projects
+	// Filter the results to only include the project ID and number
+	req := cloudresourcemanagerService.Projects.List().PageSize(*pagesize).Fields("projects.projectId", "projects.projectNumber")
+	// Combine any user-specified filter with "lifecycleState:ACTIVE" to only process active projects
+	if *filter != "" {
+		*filter += " "
+	}
+	*filter = *filter + "lifecycleState:ACTIVE"
+	req = req.Filter(*filter)
+	log.Printf("[main] Projects filter: '%s'", *filter)
+	req = req.Filter(*filter)
+
+	resp, err := req.Context(ctx).Do()
+	if err != nil {
+		log.Fatal(err)
+	}
+	if resp.NextPageToken != "" {
+		// There are more projects to return but we're limiting the results to this set
+		log.Println("[main] Some projects are being excluded from the results. Refine 'filter' or increase 'max_projects'")
+	}
+	if len(resp.Projects) == 0 {
+		log.Println("[main] There are 0 projects. Nothing to do")
+		os.Exit(0)
+	}
+
+	log.Printf("[main] Exporting metrics for %d project(s)", len(resp.Projects))
+	registry.MustRegister(collector.NewComputeCollector(client, resp.Projects))
+	registry.MustRegister(collector.NewExporterCollector(OSVersion, GoVersion, GitCommit, StartTime))
+	registry.MustRegister(collector.NewKubernetesCollector(client, resp.Projects))
+
+	mux := http.NewServeMux()
+	mux.Handle("/", http.HandlerFunc(rootHandler))
+	mux.Handle(*metricsPath, promhttp.HandlerFor(registry, promhttp.HandlerOpts{}))
+
+	log.Printf("[main] Server starting (%s)", *endpoint)
+	log.Printf("[main] metrics served on: %s", *metricsPath)
+	log.Fatal(http.ListenAndServe(*endpoint, mux))
+}
