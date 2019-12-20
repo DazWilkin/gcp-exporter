@@ -1,6 +1,6 @@
 # Prometheus Exporter for [Google Cloud Platform (GCP)](https://cloud.google.com/)
 
-I want to be able to monitor my resource consumption across multiple cloud platforms (GCP, Digital Ocean and Linode). I was inspired by [@metalmatze](https://github.com/metalmatze)'s [DigitalOcean Exporter](https://github.com/metalmatze/digitalocean_exporter) and, with this exporter, have the three that I need:
+I want to be able to monitor my resource consumption across multiple cloud platforms ([GCP](https://cloud.google.com), [Digital Ocean](https://digitalocean.com) and [Linode](https://linode.com)). I was inspired by [@metalmatze](https://github.com/metalmatze)'s [DigitalOcean Exporter](https://github.com/metalmatze/digitalocean_exporter) and, with this exporter, have the three that I need:
 
 + [Google Cloud Platform Exporter](https://github.com/DazWilkin/gcp-exporter)
 + [Digital Ocean Exporter](https://github.com/metalmatze/digitalocean_exporter)
@@ -47,7 +47,7 @@ docker run \
 --publish=${PORT}:${PORT}
 --volume=${CREDENTIALS}:/secrets/client_secrets.json \
 --env=GOOGLE_APPLICATION_CREDENTIALS=/secrets/client_secrets.json
-dazwilkin/gcp-exporter:d03792a52f906d95be5d0e9ab3444f5d8c00f96c
+dazwilkin/gcp-exporter:634434efede9b601cd43fde604f62ffc4449cce4
 ```
 ### Docker Compose
 ```bash
@@ -56,7 +56,7 @@ docker-compose up
 **NB** `docker-compose.yml` configuration for `gcp-exporter` services is:
 ```YAML
 gcp-exporter:
-  image: dazwilkin/gcp-exporter:d03792a52f906d95be5d0e9ab3444f5d8c00f96c
+  image: dazwilkin/gcp-exporter:634434efede9b601cd43fde604f62ffc4449cce4
   container_name: gcp-exporter
   environment:
   - GOOGLE_APPLICATION_CREDENTIALS=/secrets/client_secrets.json
@@ -95,6 +95,7 @@ Please file issues
 | `gcp_compute_engine_forwardingrules`       | Gauge   | Number of forwardingrules
 | `gcp_kubernetes_engine_cluster_up`         | Gauge   | 1 if the cluster is running, 0 otherwise
 | `gcp_kubernetes_engine_cluster_nodes`      | Gauge   | Number of nodes currently in the cluster
+| `gcp_storage_buckets`                      | Gauge   | Number of buckets
 
 ## Port
 
