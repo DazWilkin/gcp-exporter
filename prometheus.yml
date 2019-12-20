@@ -1,0 +1,33 @@
+global:
+  scrape_interval: 1m
+  evaluation_interval: 1m
+
+rule_files:
+  - "/etc/alertmanager/rules.yml"
+
+alerting:
+  alertmanagers:
+    - scheme: http
+      static_configs:
+        - targets:
+            - "alertmanager:9093"
+
+scrape_configs:
+  # Self
+  - job_name: "prometheus-server"
+    static_configs:
+      - targets:
+          - "localhost:9090"
+
+  # GCP Exporter
+  - job_name: "gcp-exporter"
+    scrape_interval: 15m # Reduced frequency for GCP
+    static_configs:
+      - targets:
+          - "gcp-exporter:9402"
+
+  # cAdvisor exports metrics for *all* containers running on this host
+  - job_name: cadvisor
+    static_configs:
+      - targets:
+          - "cadvisor:8080"

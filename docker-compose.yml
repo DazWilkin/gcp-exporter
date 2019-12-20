@@ -1,0 +1,58 @@
+version: "3"
+
+services:
+  cadvisor:
+    restart: always
+    image: google/cadvisor:v0.33.0
+    container_name: cadvisor
+    volumes:
+      - "/:/rootfs:ro"
+      - "/var/run:/var/run:rw"
+      - "/sys:/sys:ro"
+      # Default location
+      # - "/var/lib/docker/:/var/lib/docker:ro"
+      # Snap location
+      - "/var/snap/docker/current:/var/lib/docker:ro"
+    expose:
+      - "8080"
+    ports:
+      - 8085:8080
+
+  prometheus:
+    restart: always
+    depends_on:
+      - gcp-exporter
+    image: prom/prometheus:v2.14.0
+    container_name: prometheus
+    volumes:
+      - ${PWD}/prometheus.yml:/etc/prometheus/prometheus.yml
+      - ${PWD}/rules.yaml:/etc/alertmanager/rules.yml
+    expose:
+      - "9090"
+    ports:
+      - 9090:9090
+
+  alertmanager:
+    restart: always
+    depends_on:
+      - prometheus
+    image: prom/alertmanager:v0.20.0
+    container_name: alertmanager
+    volumes:
+      - ${PWD}/alertmanager.yml:/etc/alertmanager/alertmanager.yml
+    expose:
+      - "9093"
+    ports:
+      - 9093:9093
+
+  gcp-exporter:
+    image: dazwilkin/gcp-exporter:915d6400c96d89ab28d8cd41ea3ddbb3df2e9d7e
+    container_name: gcp-exporter
+    environment:
+      - GOOGLE_APPLICATION_CREDENTIALS=/secrets/client_secrets.json
+    volumes:
+      - /home/dazwilkin/.config/gcloud/application_default_credentials.json:/secrets/client_secrets.json
+    expose:
+      - "9402" # GCP Exporter port registered on Prometheus Wiki
+    ports:
+      - 9402:9402
