@@ -20,7 +20,9 @@ And:
 
 The application uses Google's [Application Default Credentials (ADCs)](https://cloud.google.com/docs/authentication/production#finding_credentials_automatically) to simplify authentication by finding credentials automatically.
 
-On a machine running `gcloud` that's authenticated with your user (e.g. Gmail) account, you can run `gcloud auth application-default` to establish your user account as ADCs. This ensures that the Exporter is able to operate as if it were you(r user account), enumerate GCP projects that you(r user account) has access to and resources within those projects. If you run the Exporter remotely, you will need to create a service account for it to use. The Exporter will only be able to enumerate projects and project resources that this service account is able to access.
+On a machine running `gcloud` that's authenticated with your user (e.g. Gmail) account, you can run `gcloud auth application-default` to establish your user account as ADCs. This ensures that the Exporter is able to operate as if it were you(r user account), enumerate GCP projects that you(r user account) has access to and resources within those projects.
+
+If you run the Exporter remotely, you will need to create a service account for it to use. The Exporter will only be able to enumerate projects and project resources that this service account is able to access.
 
 In the following examples, the Exporter's container is configured to use the ADCS stored in `${HOME}/.config/gcloud/appl...`
 
@@ -43,7 +45,7 @@ docker run \
 --publish=${PORT}:${PORT}
 --volume=${CREDENTIALS}:/secrets/client_secrets.json \
 --env=GOOGLE_APPLICATION_CREDENTIALS=/secrets/client_secrets.json
-dazwilkin/gcp-exporter:915d6400c96d89ab28d8cd41ea3ddbb3df2e9d7e
+dazwilkin/gcp-exporter:d03792a52f906d95be5d0e9ab3444f5d8c00f96c
 ```
 ### Docker Compose
 ```bash
@@ -52,7 +54,7 @@ docker-compose up
 **NB** `docker-compose.yml` configuration for `gcp-exporter` services is:
 ```YAML
 gcp-exporter:
-  image: dazwilkin/gcp-exporter:915d6400c96d89ab28d8cd41ea3ddbb3df2e9d7e
+  image: dazwilkin/gcp-exporter:d03792a52f906d95be5d0e9ab3444f5d8c00f96c
   container_name: gcp-exporter
   environment:
   - GOOGLE_APPLICATION_CREDENTIALS=/secrets/client_secrets.json
@@ -85,11 +87,12 @@ Please file issues
 
 | Name                                       | Type    | Description
 | ----                                       | ------- | -----------
-| `gcp_exporter_buildinfo`                   | Counter ||
-| `gcp_exporter_startime`                    | Gauge   ||
-| `gcp_compute_engine_instances`             | Gauge   ||
-| `gcp_kubernetes_engine_cluster_up`         | Gauge   ||
-| `gcp_kubernetes_engine_cluster_nodes`      | Gauge   ||
+| `gcp_exporter_buildinfo`                   | Counter | A metric with a constant '1' value labeled by OS version, Go version, and the Git commit of the exporter
+| `gcp_exporter_startime`                    | Gauge   | Exporter start time in Unix epoch seconds
+| `gcp_compute_engine_instances`             | Gauge   | Number of instances
+| `gcp_compute_engine_forwardingrules`       | Gauge   | Number of forwardingrules
+| `gcp_kubernetes_engine_cluster_up`         | Gauge   | 1 if the cluster is running, 0 otherwise
+| `gcp_kubernetes_engine_cluster_nodes`      | Gauge   | Number of nodes currently in the cluster
 
 ## Port
 
