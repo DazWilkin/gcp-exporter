@@ -8,6 +8,13 @@ groups:
           severity: page
         annotations:
           summary: GCP Compute Engine Instances running
+      - alert: GCPForwardingRulesRunning
+        expr: gcp_compute_engine_forwardingrules{} > 0
+        for: 60m
+        labels:
+          severity: page
+        annotations:
+          summary: GCP Compute Engine ForwardingRules running
       - alert: GCPKubernetesClustersRunning
         expr: gcp_kubernetes_engine_cluster_up{} > 0
         for: 60m
