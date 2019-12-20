@@ -96,6 +96,7 @@ func main() {
 	registry.MustRegister(collector.NewComputeCollector(client, resp.Projects))
 	registry.MustRegister(collector.NewExporterCollector(OSVersion, GoVersion, GitCommit, StartTime))
 	registry.MustRegister(collector.NewKubernetesCollector(client, resp.Projects))
+	registry.MustRegister(collector.NewStorageCollector(client, resp.Projects))
 
 	mux := http.NewServeMux()
 	mux.Handle("/", http.HandlerFunc(rootHandler))
