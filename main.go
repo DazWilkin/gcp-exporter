@@ -37,10 +37,17 @@ var (
 	metricsPath = flag.String("path", "/metrics", "The path on which Prometheus metrics will be served")
 )
 
-func rootHandler(w http.ResponseWriter, r *http.Request) {
+func handleHealthz(w http.ResponseWriter, r *http.Request) {
+	w.WriteHeader(http.StatusOK)
+	w.Write([]byte("ok"))
+}
+func handleRoot(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "text/html; charset=UTF-8")
 	fmt.Fprint(w, "<h2>Google Cloud Platform Resources Exporter</h2>")
-	fmt.Fprintf(w, "<a href=\"%s\">metrics</a>", *metricsPath)
+	fmt.Fprint(w, "<ul>")
+	fmt.Fprintf(w, "<li><a href=\"%s\">metrics</a></li>", *metricsPath)
+	fmt.Fprintf(w, "<li><a href=\"/healthz\">healthz</a></li>")
+	fmt.Fprint(w, "</ul>")
 }
 func main() {
 	flag.Parse()
@@ -99,7 +106,8 @@ func main() {
 	registry.MustRegister(collector.NewStorageCollector(client, resp.Projects))
 
 	mux := http.NewServeMux()
-	mux.Handle("/", http.HandlerFunc(rootHandler))
+	mux.Handle("/", http.HandlerFunc(handleRoot))
+	mux.Handle("/healthz", http.HandlerFunc(handleHealthz))
 	mux.Handle(*metricsPath, promhttp.HandlerFor(registry, promhttp.HandlerOpts{}))
 
 	log.Printf("[main] Server starting (%s)", *endpoint)
