@@ -74,11 +74,8 @@ func (c *ComputeCollector) Collect(ch chan<- prometheus.Metric) {
 				// Must repeat the call for all possible zones
 				zoneList, err := computeService.Zones.List(p.ProjectId).Context(ctx).Do()
 				if err != nil {
-					if e, ok := err.(*googleapi.Error); ok && e.Code == http.StatusForbidden {
-						// This occurs commonly as "Access Not Configured" when Compute Engine API is not enabled in the project
-						log.Printf("[ComputeCollector] Project: %s -- 403 with zones.list", p.ProjectId)
-					} else {
-						log.Println(err)
+					if e, ok := err.(*googleapi.Error); ok {
+						log.Printf("[ComputeCollector] Project: %s -- Zones.List (%d)", p.ProjectId, e.Code)
 					}
 					return
 				}
@@ -121,7 +118,11 @@ func (c *ComputeCollector) Collect(ch chan<- prometheus.Metric) {
 				// Must repeat call for all possible regions
 				regionList, err := computeService.Regions.List(p.ProjectId).Context(ctx).Do()
 				if err != nil {
-					log.Println(err)
+					if e, ok := err.(*googleapi.Error); ok {
+						log.Printf("[ComputeCollector] Project: %s -- Regions.List (%d)", p.ProjectId, e.Code)
+					} else {
+						log.Println(err)
+					}
 					return
 				}
 				for _, r := range regionList.Items {
