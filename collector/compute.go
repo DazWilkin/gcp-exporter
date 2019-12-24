@@ -10,6 +10,7 @@ import (
 
 	"google.golang.org/api/cloudresourcemanager/v1"
 	"google.golang.org/api/compute/v1"
+	"google.golang.org/api/googleapi"
 )
 
 // ComputeCollector represents Compute Engine
@@ -73,7 +74,12 @@ func (c *ComputeCollector) Collect(ch chan<- prometheus.Metric) {
 				// Must repeat the call for all possible zones
 				zoneList, err := computeService.Zones.List(p.ProjectId).Context(ctx).Do()
 				if err != nil {
-					log.Println(err)
+					if e, ok := err.(*googleapi.Error); ok && e.Code == http.StatusForbidden {
+						// This occurs commonly as "Access Not Configured" when Compute Engine API is not enabled in the project
+						log.Printf("[ComputeCollector] Project: %s -- 403 with zones.list", p.ProjectId)
+					} else {
+						log.Println(err)
+					}
 					return
 				}
 				for _, z := range zoneList.Items {
