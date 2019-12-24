@@ -22,3 +22,10 @@ groups:
           severity: page
         annotations:
           summary: GCP Kubernetes Engine clusters running
+      - alert: GCPStorageBuckets
+        expr: gcp_storage_buckets{} > 0
+        for: 60m
+        labels:
+          severity: warning
+        annotations:
+          summary: GCP Storage buckets exist
