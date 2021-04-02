@@ -1,2 +1,5 @@
 # Contains secrets
 alertmanager.yml
+
+# Visual Studio Code config
+.vscode/

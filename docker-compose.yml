@@ -3,7 +3,7 @@ version: "3"
 services:
   cadvisor:
     restart: always
-    image: google/cadvisor:v0.33.0
+    image: gcr.io/google-containers/cadvisor:v0.36.0
     container_name: cadvisor
     volumes:
       - "/:/rootfs:ro"
@@ -22,7 +22,7 @@ services:
     restart: always
     depends_on:
       - gcp-exporter
-    image: prom/prometheus:v2.14.0
+    image: prom/prometheus:v2.26.0
     container_name: prometheus
     volumes:
       - ${PWD}/prometheus.yml:/etc/prometheus/prometheus.yml
@@ -36,7 +36,7 @@ services:
     restart: always
     depends_on:
       - prometheus
-    image: prom/alertmanager:v0.20.0
+    image: prom/alertmanager:v0.21.0
     container_name: alertmanager
     volumes:
       - ${PWD}/alertmanager.yml:/etc/alertmanager/alertmanager.yml
