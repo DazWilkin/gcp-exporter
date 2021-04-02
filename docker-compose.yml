@@ -46,12 +46,12 @@ services:
       - 9093:9093
 
   gcp-exporter:
-    image: dazwilkin/gcp-exporter:4592794fa4b6f6ed76a0f767368793c3ae968c0f
+    image: ghcr.io/dazwilkin/gcp-exporter:2c60a0665c71302a3ed058b069eee2d39d9361ca
     container_name: gcp-exporter
     environment:
       - GOOGLE_APPLICATION_CREDENTIALS=/secrets/client_secrets.json
     volumes:
-      - /home/dazwilkin/.config/gcloud/application_default_credentials.json:/secrets/client_secrets.json
+      - ${HOME}/.config/gcloud/application_default_credentials.json:/secrets/client_secrets.json
     expose:
       - "9402" # GCP Exporter port registered on Prometheus Wiki
     ports:
