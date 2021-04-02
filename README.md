@@ -41,7 +41,7 @@ go run github.com/DazWilkin/gcp-exporter
 ```bash
 PORT=9402
 CREDENTIALS="${HOME}/.config/gcloud/application_default_credentials.json"
-REPO="dazwilkin/gcp-exporter"
+REPO="ghcr.io/dazwilkin/gcp-exporter"
 docker run \
 --interactive --tty \
 --publish=${PORT}:${PORT}
