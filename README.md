@@ -22,7 +22,7 @@ And:
 
 The application uses Google's [Application Default Credentials (ADCs)](https://cloud.google.com/docs/authentication/production#finding_credentials_automatically) to simplify authentication by finding credentials automatically.
 
-On a machine running `gcloud` that's authenticated with your user (e.g. Gmail) account, you can run `gcloud auth application-default` to establish your user account as ADCs. This ensures that the Exporter is able to operate as if it were you(r user account), enumerate GCP projects that you(r user account) has access to and resources within those projects.
+On a machine running `gcloud` that's authenticated with your user (e.g. Gmail) account, you can run `gcloud auth application-default login` to establish your user account as ADCs. This ensures that the Exporter is able to operate as if it were you(r user account), enumerate GCP projects that you(r user account) has access to and resources within those projects.
 
 If you run the Exporter remotely, you will need to create a service account for it to use. The Exporter will only be able to enumerate projects and project resources that this service account is able to access.
 
@@ -38,6 +38,7 @@ go run github.com/DazWilkin/gcp-exporter
 ```
 
 ### Standalone
+
 ```bash
 PORT=9402
 CREDENTIALS="${HOME}/.config/gcloud/application_default_credentials.json"
@@ -47,13 +48,17 @@ docker run \
 --publish=${PORT}:${PORT} \
 --volume=${CREDENTIALS}:/secrets/client_secrets.json \
 --env=GOOGLE_APPLICATION_CREDENTIALS=/secrets/client_secrets.json \
-ghcr.io/dazwilkin/gcp-exporter:ddfd85db7fb24845a76712708c0585af83a69d4d
+ghcr.io/dazwilkin/gcp-exporter:2c60a0665c71302a3ed058b069eee2d39d9361ca
 ```
+
 ### Docker Compose
+
 ```bash
 docker-compose up
 ```
+
 **NB** `docker-compose.yml` configuration for `gcp-exporter` services is:
+
 ```YAML
 gcp-exporter:
   image: dazwilkin/gcp-exporter:4592794fa4b6f6ed76a0f767368793c3ae968c0f
