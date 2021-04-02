@@ -44,10 +44,10 @@ CREDENTIALS="${HOME}/.config/gcloud/application_default_credentials.json"
 REPO="ghcr.io/dazwilkin/gcp-exporter"
 docker run \
 --interactive --tty \
---publish=${PORT}:${PORT}
+--publish=${PORT}:${PORT} \
 --volume=${CREDENTIALS}:/secrets/client_secrets.json \
---env=GOOGLE_APPLICATION_CREDENTIALS=/secrets/client_secrets.json
-dazwilkin/gcp-exporter:4592794fa4b6f6ed76a0f767368793c3ae968c0f
+--env=GOOGLE_APPLICATION_CREDENTIALS=/secrets/client_secrets.json \
+ghcr.io/dazwilkin/gcp-exporter:4592794fa4b6f6ed76a0f767368793c3ae968c0f
 ```
 ### Docker Compose
 ```bash
