@@ -101,6 +101,7 @@ func main() {
 
 	log.Printf("[main] Exporting metrics for %d project(s)", len(resp.Projects))
 	registry.MustRegister(collector.NewComputeCollector(client, resp.Projects))
+	registry.MustRegister(collector.NewCloudRunCollector(client, resp.Projects))
 	registry.MustRegister(collector.NewExporterCollector(OSVersion, GoVersion, GitCommit, StartTime))
 	registry.MustRegister(collector.NewKubernetesCollector(client, resp.Projects))
 	registry.MustRegister(collector.NewStorageCollector(client, resp.Projects))
