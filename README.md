@@ -47,7 +47,7 @@ docker run \
 --publish=${PORT}:${PORT} \
 --volume=${CREDENTIALS}:/secrets/client_secrets.json \
 --env=GOOGLE_APPLICATION_CREDENTIALS=/secrets/client_secrets.json \
-ghcr.io/dazwilkin/gcp-exporter:4592794fa4b6f6ed76a0f767368793c3ae968c0f
+ghcr.io/dazwilkin/gcp-exporter:ddfd85db7fb24845a76712708c0585af83a69d4d
 ```
 ### Docker Compose
 ```bash
