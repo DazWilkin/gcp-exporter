@@ -1,10 +1,9 @@
 module github.com/DazWilkin/gcp-exporter
 
-go 1.13
+go 1.16
 
 require (
-	github.com/go-kit/kit v0.9.0
-	github.com/prometheus/client_golang v1.2.1
-	golang.org/x/oauth2 v0.0.0-20191202225959-858c2ad4c8b6
-	google.golang.org/api v0.15.0
+	github.com/prometheus/client_golang v1.10.0
+	golang.org/x/oauth2 v0.0.0-20210402161424-2e8d93401602
+	google.golang.org/api v0.43.0
 )
