@@ -10,6 +10,7 @@ import (
 	"github.com/prometheus/client_golang/prometheus"
 
 	"google.golang.org/api/cloudresourcemanager/v1"
+	"google.golang.org/api/option"
 	"google.golang.org/api/run/v1"
 )
 
@@ -40,7 +41,8 @@ func NewCloudRunCollector(client *http.Client, projects []*cloudresourcemanager.
 
 func (c *CloudRunCollector) Collect(ch chan<- prometheus.Metric) {
 	ctx := context.Background()
-	cloudrunService, err := run.New(c.client)
+	opts := []option.ClientOption{}
+	cloudrunService, err := run.NewService(ctx, opts...)
 	if err != nil {
 		log.Println(err)
 		return
