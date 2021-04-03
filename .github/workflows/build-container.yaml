@@ -37,6 +37,7 @@ jobs:
       - name: revise README|docker-compose
         run: |
           sed --in-place "s|${{ env.REPO }}:[0-9a-f]\{40\}|${{ env.REPO }}:${{ github.sha }}|g" ./docker-compose.yml
+          more ./docker-compose.yaml
           sed --in-place "s|${{ env.REPO }}:[0-9a-f]\{40\}|${{ env.REPO }}:${{ github.sha }}|g" ./README.md
       - name: Commit changes
         run: |
