@@ -32,7 +32,7 @@ jobs:
           context: .
           file: ./Dockerfile
           build-args: |
-            VERSION=${{ env.VERSION }}
+            VERSION=5.4.0-1043-azure
             COMMIT=${{ github.sha }}
           tags: ghcr.io/${{ env.REPO }}:${{ github.sha }}
           push: true
