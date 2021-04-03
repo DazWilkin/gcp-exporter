@@ -29,3 +29,10 @@ groups:
           severity: warning
         annotations:
           summary: GCP Storage buckets exist
+      - alert: GCPCloudRunServicesRunning
+        expr: gcp_cloudrun_services{} > 0
+        for: 60m
+        labels:
+          severity: warning
+        annotations:
+          summary: GCP Cloud Run services running
