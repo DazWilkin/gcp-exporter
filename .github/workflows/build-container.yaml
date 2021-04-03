@@ -34,23 +34,19 @@ jobs:
             COMMIT=${{ github.sha }}
           tags: ghcr.io/${{ env.REPO }}:${{ github.sha }}
           push: true
-      - name: revise docker-compose.yml
-        run: |
-          sed \
-          --in-place \
-          "s|ghcr.io/${{ env.REPO }}:[0-9a-f]\{40\}|ghcr.io/${{ env.REPO }}:${{ github.sha }}|g" \
-          ./docker-compose.yml
-      - name: revise README.md
-        run: |
-          sed \
-          --in-place \
-          "s|ghcr.io/${{ env.REPO }}:[0-9a-f]\{40\}|ghcr.io/${{ env.REPO }}:${{ github.sha }}|g" \
-          ./README.md
-      - name: Commit changes
+      - name: revise occurrences of the image
         run: |
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Actions"
-          git add ./docker-compose.yml
-          git add ././README.md
+
+          for FILENAME in "./docker-compose.yml" "./kubernetes.yaml" "./README.md"
+          do
+            sed \
+            --in-place \
+            "s|ghcr.io/${{ env.REPO }}:[0-9a-f]\{40\}|ghcr.io/${{ env.REPO }}:${{ github.sha }}|g" \
+            ${FILENAME}
+            git add ${FILENAME}
+          done
+
           git commit --message "GitHub Actions updating README and docker-compose.yml"
           git push origin master
