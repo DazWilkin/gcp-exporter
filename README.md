@@ -48,7 +48,7 @@ docker run \
 --publish=${PORT}:${PORT} \
 --volume=${CREDENTIALS}:/secrets/client_secrets.json \
 --env=GOOGLE_APPLICATION_CREDENTIALS=/secrets/client_secrets.json \
-ghcr.io/dazwilkin/gcp-exporter:49e21b1cc5e236eb0ebe0c976f9df05607b7c3ab
+ghcr.io/dazwilkin/gcp-exporter:424447730207b7930621517357bc71cc981096df
 ```
 
 ### Docker Compose
@@ -61,7 +61,7 @@ docker-compose up
 
 ```YAML
 gcp-exporter:
-  image: dazwilkin/gcp-exporter:4592794fa4b6f6ed76a0f767368793c3ae968c0f
+  image: dazwilkin/gcp-exporter:424447730207b7930621517357bc71cc981096df
   container_name: gcp-exporter
   environment:
   - GOOGLE_APPLICATION_CREDENTIALS=/secrets/client_secrets.json
