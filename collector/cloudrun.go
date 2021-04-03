@@ -14,6 +14,7 @@ import (
 	"google.golang.org/api/run/v1"
 )
 
+// CloudRunCollector represents Cloud Run
 type CloudRunCollector struct {
 	client   *http.Client
 	projects []*cloudresourcemanager.Project
@@ -21,6 +22,7 @@ type CloudRunCollector struct {
 	Services *prometheus.Desc
 }
 
+// NewCloudRunCollector returns a new CloudRunCollector
 func NewCloudRunCollector(client *http.Client, projects []*cloudresourcemanager.Project) *CloudRunCollector {
 	fqName := name("cloud_run")
 	return &CloudRunCollector{
@@ -32,13 +34,14 @@ func NewCloudRunCollector(client *http.Client, projects []*cloudresourcemanager.
 			"Number of services",
 			[]string{
 				"project",
-				"region",
+				// "region",
 			},
 			nil,
 		),
 	}
 }
 
+// Collect implements Prometheus' Collector interface and is used to collect metrics
 func (c *CloudRunCollector) Collect(ch chan<- prometheus.Metric) {
 	ctx := context.Background()
 	opts := []option.ClientOption{}
@@ -56,8 +59,7 @@ func (c *CloudRunCollector) Collect(ch chan<- prometheus.Metric) {
 			defer wg.Done()
 			log.Printf("[CloudRunCollector] Project: %s", p.ProjectId)
 
-			rqst := cloudrunService.Namespaces.Services.List(Parent(p.ProjectId))
-			resp, err := rqst.Do()
+			resp, err := cloudrunService.Namespaces.Services.List(Parent(p.ProjectId)).Do()
 			if err != nil {
 				log.Println(err)
 				return
@@ -75,8 +77,10 @@ func (c *CloudRunCollector) Collect(ch chan<- prometheus.Metric) {
 			}
 		}(p)
 	}
+	wg.Wait()
 }
 
+// Describe implements Prometheus' Collector interface and is used to describe metrics
 func (c *CloudRunCollector) Describe(ch chan<- *prometheus.Desc) {
 	ch <- c.Services
 }
