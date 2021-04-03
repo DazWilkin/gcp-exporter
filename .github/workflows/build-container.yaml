@@ -36,8 +36,12 @@ jobs:
           push: true
       - name: revise README|docker-compose
         run: |
-          sed --in-place "s|${REPO}:[0-9a-f]\{40\}|${REPO}:${COMMIT}|g" ./docker-compose.yml
-          sed --in-place "s|${REPO}:[0-9a-f]\{40\}|${REPO}:${COMMIT}|g" ./README.md
+          sed --in-place "s|${{ env.REPO }}:[0-9a-f]\{40\}|${{ env.REPO }}:${{ github.sha }}|g" ./docker-compose.yml
+          sed --in-place "s|${{ env.REPO }}:[0-9a-f]\{40\}|${{ env.REPO }}:${{ github.sha }}|g" ./README.md
+      - name: Commit changes
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
           git status
           git add .
           git commit --message "GitHub Actions updating README and docker-compose.yml"
