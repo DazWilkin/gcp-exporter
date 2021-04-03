@@ -24,7 +24,7 @@ type CloudRunCollector struct {
 
 // NewCloudRunCollector returns a new CloudRunCollector
 func NewCloudRunCollector(client *http.Client, projects []*cloudresourcemanager.Project) *CloudRunCollector {
-	fqName := name("cloud_run")
+	fqName := name("cloudrun")
 	return &CloudRunCollector{
 		client:   client,
 		projects: projects,
