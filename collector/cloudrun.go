@@ -10,6 +10,7 @@ import (
 	"github.com/prometheus/client_golang/prometheus"
 
 	"google.golang.org/api/cloudresourcemanager/v1"
+	"google.golang.org/api/googleapi"
 	"google.golang.org/api/option"
 	"google.golang.org/api/run/v1"
 )
@@ -61,6 +62,12 @@ func (c *CloudRunCollector) Collect(ch chan<- prometheus.Metric) {
 
 			resp, err := cloudrunService.Namespaces.Services.List(Parent(p.ProjectId)).Do()
 			if err != nil {
+				if e, ok := err.(*googleapi.Error); ok {
+					if e.Code == 403 {
+						// Probably (!) Cloud Run Admin API has not been used in this project
+						return
+					}
+				}
 				log.Println(err)
 				return
 			}
