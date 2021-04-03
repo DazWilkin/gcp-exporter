@@ -1,0 +1,19 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  labels:
+    prometheus: service-prometheus
+    role: alert-rules
+  name: gcp-exporter
+  namespace: monitoring
+spec:
+  groups:
+    - name: GCP
+      rules:
+        - alert: GCPCloudRunServicesRunning
+          expr: gcp_cloudrun_services{} > 0
+          for: 60m
+          labels:
+            severity: warning
+          annotations:
+            summary: GCP Cloud Run services running

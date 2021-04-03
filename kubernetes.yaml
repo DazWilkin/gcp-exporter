@@ -1,0 +1,62 @@
+apiVersion: v1
+kind: List
+metadata: {}
+items:
+  - apiVersion: v1
+    kind: Service
+    metadata:
+      labels:
+        app: gcp-exporter
+      name: gcp-exporter
+    spec:
+      selector:
+        app: gcp-exporter
+      ports:
+        - name: metrics
+          port: 9402
+          targetPort: 9402
+  - apiVersion: apps/v1
+    kind: Deployment
+    metadata:
+      labels:
+        app: gcp-exporter
+      name: gcp-exporter
+    spec:
+      replicas: 1
+      selector:
+        matchLabels:
+          app: gcp-exporter
+      template:
+        metadata:
+          labels:
+            app: gcp-exporter
+        spec:
+          containers:
+            - name: gcp-exporter
+              image: ghcr.io/dazwilkin/gcp-exporter:5f45a64e9f0c2f37ace46671fe37ffa5917edecf
+              env:
+                - name: GOOGLE_APPLICATION_CREDENTIALS
+                  value: /secrets/client_secrets.json
+              ports:
+                - name: metrics
+                  containerPort: 9402
+              volumeMounts:
+                - name: secrets
+                  mountPath: /secrets
+          restartPolicy: Always
+          volumes:
+            - name: secrets
+              secret:
+                secretName: gcp-exporter
+  - apiVersion: monitoring.coreos.com/v1
+    kind: ServiceMonitor
+    metadata:
+      name: gcp-exporter
+      labels:
+        app: gcp-exporter
+    spec:
+      selector:
+        matchLabels:
+          app: gcp-exporter
+      endpoints:
+        - port: metrics

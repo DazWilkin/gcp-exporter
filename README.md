@@ -84,6 +84,29 @@ The Docker Compose configuration includes:
 
 **NB** You will need to create an `alertmanager.yml` configuration file. This [example](https://www.robustperception.io/sending-email-with-the-alertmanager-via-gmail) shows you how to configure AlertManager to send alerts to Gmail
 
+### Kubernetes
+
+Assuming MicroK8s and Prometheus Operator
+
+```bash
+NAMESPACE="gcp-exporter"
+
+kubectl create namespace ${NAMESPACE}
+
+kubectl create secret generic gcp-exporter \
+--from-file=client_secrets.json=/home/dazwilkin/.config/gcloud/application_default_credentials.json \
+--namespace=${NAMESPACE}
+
+kubectl apply \
+--filename=./kubernetes.yaml \
+--namespace=${NAMESPACE}
+
+# NB This must be installed to 'monitoring' namespace
+kubectl apply --filename=./kubernetes.rule.yaml  --namespace=monitoring
+
+
+```
+
 ## Develop
 
 ```bash
