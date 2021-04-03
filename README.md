@@ -61,7 +61,7 @@ docker-compose up
 
 ```YAML
 gcp-exporter:
-  image: dazwilkin/gcp-exporter:424447730207b7930621517357bc71cc981096df
+  image: ghcr.io/dazwilkin/gcp-exporter:424447730207b7930621517357bc71cc981096df
   container_name: gcp-exporter
   environment:
   - GOOGLE_APPLICATION_CREDENTIALS=/secrets/client_secrets.json
