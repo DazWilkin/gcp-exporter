@@ -1,5 +1,7 @@
 #!/bin/bash
 
+# Replaced with GitHub Actions
+
 REPO="ghcr.io/dazwilkin/gcp-exporter"
 VERSION=$(uname --kernel-release)
 COMMIT=$(git rev-parse HEAD)
