@@ -1,5 +1,6 @@
 # Contains secrets
 alertmanager.yml
+kubernetes.alerting.yaml
 
 # Visual Studio Code config
 .vscode/
