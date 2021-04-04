@@ -51,8 +51,11 @@ services:
     environment:
       - GOOGLE_APPLICATION_CREDENTIALS=/secrets/client_secrets.json
     volumes:
-      - ${HOME}/.config/gcloud/application_default_credentials.json:/secrets/client_secrets.json
+      # Default location
+      # - ${HOME}/.config/gcloud/application_default_credentials.json:/secrets/client_secrets.json
+      # Using Snap will not resolve ${HOME} and requires fully resolved path
+      - /home/[[whoami]]/.config/gcloud/application_default_credentials.json:/secrets/client_secrets.json
     expose:
-      - "9402" # GCP Exporter port registered on Prometheus Wiki
+      - "9402"
     ports:
       - 9402:9402
