@@ -1,6 +1,7 @@
 # Prometheus Exporter for [Google Cloud Platform (GCP)](https://cloud.google.com/)
 
 [![build-container](https://github.com/DazWilkin/gcp-exporter/actions/workflows/build-container.yaml/badge.svg)](https://github.com/DazWilkin/gcp-exporter/actions/workflows/build-container.yaml)
+[![Go Reference](https://pkg.go.dev/badge/github.com/DazWilkin/gcp-exporter.svg)](https://pkg.go.dev/github.com/DazWilkin/gcp-exporter)
 
 I want to be able to monitor my resource consumption across multiple cloud platforms ([GCP](https://cloud.google.com), [Digital Ocean](https://digitalocean.com) and [Linode](https://linode.com)). I was inspired by [@metalmatze](https://github.com/metalmatze)'s [DigitalOcean Exporter](https://github.com/metalmatze/digitalocean_exporter) and, with this exporter, have the three that I need:
 
