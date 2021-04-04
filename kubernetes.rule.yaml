@@ -5,7 +5,7 @@ metadata:
     prometheus: service-prometheus
     role: alert-rules
   name: gcp-exporter
-  namespace: monitoring
+  namespace: monitoring # Must be created in 'monitoring' namespace
 spec:
   groups:
     - name: GCP
