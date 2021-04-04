@@ -54,7 +54,7 @@ services:
       # Default location
       # - ${HOME}/.config/gcloud/application_default_credentials.json:/secrets/client_secrets.json
       # Using Snap will not resolve ${HOME} and requires fully resolved path
-      - /home/[[whoami]]/.config/gcloud/application_default_credentials.json:/secrets/client_secrets.json
+      - /home/userid/.config/gcloud/application_default_credentials.json:/secrets/client_secrets.json
     expose:
       - "9402"
     ports:
