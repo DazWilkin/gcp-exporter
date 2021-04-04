@@ -17,4 +17,5 @@ docker build \
 docker push ${REPO}:${COMMIT}
 
 sed --in-place "s|${REPO}:[0-9a-f]\{40\}|${REPO}:${COMMIT}|g" ./docker-compose.yml
+sed --in-place "s|${REPO}:[0-9a-f]\{40\}|${REPO}:${COMMIT}|g" ./kubernetes.alerting.yaml
 sed --in-place "s|${REPO}:[0-9a-f]\{40\}|${REPO}:${COMMIT}|g" ./README.md
