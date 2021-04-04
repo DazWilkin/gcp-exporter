@@ -60,18 +60,42 @@ func (c *CloudRunCollector) Collect(ch chan<- prometheus.Metric) {
 			defer wg.Done()
 			log.Printf("[CloudRunCollector] Project: %s", p.ProjectId)
 
-			resp, err := cloudrunService.Namespaces.Services.List(Parent(p.ProjectId)).Do()
-			if err != nil {
-				if e, ok := err.(*googleapi.Error); ok {
-					if e.Code == 403 {
-						// Probably (!) Cloud Run Admin API has not been used in this project
-						return
+			// ListServicesResponse may (!) contain Metadata
+			// If Metadata is presnet, it may (!) contain Continue iff there's more data
+			// https://pkg.go.dev/google.golang.org/api@v0.43.0/run/v1#ListServicesResponse
+			// https://pkg.go.dev/google.golang.org/api@v0.43.0/run/v1#ListMeta
+
+			rqst := cloudrunService.Namespaces.Services.List(Parent(p.ProjectId))
+
+			// Do request at least once
+			continue_ := ""
+			count := 0
+			for {
+				rqst.Continue(continue_)
+				resp, err := rqst.Do()
+				if err != nil {
+					if e, ok := err.(*googleapi.Error); ok {
+						if e.Code == http.StatusForbidden {
+							// Probably (!) Cloud Run Admin API has not been used in this project
+							return
+						}
 					}
+					log.Println(err)
+					return
 				}
-				log.Println(err)
-				return
+
+				pageSize := len(resp.Items)
+				count += pageSize
+
+				if resp.Metadata != nil {
+					// If there's Metadata, update continue_
+					continue_ = resp.Metadata.Continue
+				} else {
+					// Otherwise, we're done
+					break
+				}
 			}
-			count := len(resp.Items)
+
 			if count != 0 {
 				ch <- prometheus.MustNewConstMetric(
 					c.Services,
