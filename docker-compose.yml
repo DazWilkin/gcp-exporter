@@ -24,6 +24,10 @@ services:
       - gcp-exporter
     image: prom/prometheus:v2.26.0
     container_name: prometheus
+    command:
+      - --config.file=/etc/prometheus/prometheus.yml
+      # Permits `curl --request POST http://localhost:9090/-/reload`
+      - --web.enable-lifecycle
     volumes:
       - ${PWD}/prometheus.yml:/etc/prometheus/prometheus.yml
       - ${PWD}/rules.yml:/etc/alertmanager/rules.yml
