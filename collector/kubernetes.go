@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"log"
-	"net/http"
 	"sync"
 
 	"github.com/prometheus/client_golang/prometheus"
@@ -15,7 +14,6 @@ import (
 
 // KubernetesCollector represents Kubernetes Engine
 type KubernetesCollector struct {
-	client   *http.Client
 	projects []*cloudresourcemanager.Project
 
 	Up    *prometheus.Desc
@@ -23,7 +21,7 @@ type KubernetesCollector struct {
 }
 
 // NewKubernetesCollector creates a new KubernetesCollector
-func NewKubernetesCollector(client *http.Client, projects []*cloudresourcemanager.Project) *KubernetesCollector {
+func NewKubernetesCollector(projects []*cloudresourcemanager.Project) *KubernetesCollector {
 	fqName := name("kubernetes_engine")
 	labelKeys := []string{
 		"name",
@@ -31,7 +29,6 @@ func NewKubernetesCollector(client *http.Client, projects []*cloudresourcemanage
 		"version",
 	}
 	return &KubernetesCollector{
-		client:   client,
 		projects: projects,
 
 		Up: prometheus.NewDesc(
@@ -52,7 +49,7 @@ func NewKubernetesCollector(client *http.Client, projects []*cloudresourcemanage
 // Collect implements Prometheus' Collector interface and is used to collect metrics
 func (c *KubernetesCollector) Collect(ch chan<- prometheus.Metric) {
 	ctx := context.Background()
-	containerService, err := container.New(c.client)
+	containerService, err := container.NewService(ctx)
 	if err != nil {
 		log.Println(err)
 	}

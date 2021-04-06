@@ -11,23 +11,20 @@ import (
 
 	"google.golang.org/api/cloudresourcemanager/v1"
 	"google.golang.org/api/googleapi"
-	"google.golang.org/api/option"
 	"google.golang.org/api/run/v1"
 )
 
 // CloudRunCollector represents Cloud Run
 type CloudRunCollector struct {
-	client   *http.Client
 	projects []*cloudresourcemanager.Project
 
 	Services *prometheus.Desc
 }
 
 // NewCloudRunCollector returns a new CloudRunCollector
-func NewCloudRunCollector(client *http.Client, projects []*cloudresourcemanager.Project) *CloudRunCollector {
+func NewCloudRunCollector(projects []*cloudresourcemanager.Project) *CloudRunCollector {
 	fqName := name("cloudrun")
 	return &CloudRunCollector{
-		client:   client,
 		projects: projects,
 
 		Services: prometheus.NewDesc(
@@ -45,8 +42,7 @@ func NewCloudRunCollector(client *http.Client, projects []*cloudresourcemanager.
 // Collect implements Prometheus' Collector interface and is used to collect metrics
 func (c *CloudRunCollector) Collect(ch chan<- prometheus.Metric) {
 	ctx := context.Background()
-	opts := []option.ClientOption{}
-	cloudrunService, err := run.NewService(ctx, opts...)
+	cloudrunService, err := run.NewService(ctx)
 	if err != nil {
 		log.Println(err)
 		return

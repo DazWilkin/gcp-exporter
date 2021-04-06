@@ -16,8 +16,6 @@ import (
 
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
-
-	"golang.org/x/oauth2/google"
 )
 
 var (
@@ -62,13 +60,7 @@ func main() {
 	registry := prometheus.NewRegistry()
 
 	ctx := context.Background()
-
-	client, err := google.DefaultClient(ctx, "https://www.googleapis.com/auth/cloud-platform")
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	cloudresourcemanagerService, err := cloudresourcemanager.New(client)
+	cloudresourcemanagerService, err := cloudresourcemanager.NewService(ctx)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -100,11 +92,11 @@ func main() {
 	}
 
 	log.Printf("[main] Exporting metrics for %d project(s)", len(resp.Projects))
-	registry.MustRegister(collector.NewComputeCollector(client, resp.Projects))
-	registry.MustRegister(collector.NewCloudRunCollector(client, resp.Projects))
+	registry.MustRegister(collector.NewComputeCollector(resp.Projects))
+	registry.MustRegister(collector.NewCloudRunCollector(resp.Projects))
 	registry.MustRegister(collector.NewExporterCollector(OSVersion, GoVersion, GitCommit, StartTime))
-	registry.MustRegister(collector.NewKubernetesCollector(client, resp.Projects))
-	registry.MustRegister(collector.NewStorageCollector(client, resp.Projects))
+	registry.MustRegister(collector.NewKubernetesCollector(resp.Projects))
+	registry.MustRegister(collector.NewStorageCollector(resp.Projects))
 
 	mux := http.NewServeMux()
 	mux.Handle("/", http.HandlerFunc(handleRoot))

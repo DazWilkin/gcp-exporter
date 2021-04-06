@@ -3,7 +3,6 @@ package collector
 import (
 	"context"
 	"log"
-	"net/http"
 	"sync"
 
 	"github.com/prometheus/client_golang/prometheus"
@@ -15,7 +14,6 @@ import (
 
 // ComputeCollector represents Compute Engine
 type ComputeCollector struct {
-	client   *http.Client
 	projects []*cloudresourcemanager.Project
 
 	Instances       *prometheus.Desc
@@ -23,10 +21,9 @@ type ComputeCollector struct {
 }
 
 // NewComputeCollector returns a new ComputeCollector
-func NewComputeCollector(client *http.Client, projects []*cloudresourcemanager.Project) *ComputeCollector {
+func NewComputeCollector(projects []*cloudresourcemanager.Project) *ComputeCollector {
 	fqName := name("compute_engine")
 	return &ComputeCollector{
-		client:   client,
 		projects: projects,
 
 		Instances: prometheus.NewDesc(
@@ -53,7 +50,7 @@ func NewComputeCollector(client *http.Client, projects []*cloudresourcemanager.P
 // Collect implements Prometheus' Collector interface and is used to collect metrics
 func (c *ComputeCollector) Collect(ch chan<- prometheus.Metric) {
 	ctx := context.Background()
-	computeService, err := compute.New(c.client)
+	computeService, err := compute.NewService(ctx)
 	if err != nil {
 		log.Println(err)
 		return

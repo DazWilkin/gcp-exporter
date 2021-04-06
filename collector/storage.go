@@ -3,7 +3,6 @@ package collector
 import (
 	"context"
 	"log"
-	"net/http"
 	"sync"
 
 	"github.com/prometheus/client_golang/prometheus"
@@ -14,17 +13,15 @@ import (
 
 // StorageCollector represents Cloud Storage
 type StorageCollector struct {
-	client   *http.Client
 	projects []*cloudresourcemanager.Project
 
 	Buckets *prometheus.Desc
 }
 
 // NewStorageCollector returns a StorageCollector
-func NewStorageCollector(client *http.Client, projects []*cloudresourcemanager.Project) *StorageCollector {
+func NewStorageCollector(projects []*cloudresourcemanager.Project) *StorageCollector {
 	fqName := name("storage")
 	return &StorageCollector{
-		client:   client,
 		projects: projects,
 
 		Buckets: prometheus.NewDesc(
@@ -42,7 +39,7 @@ func NewStorageCollector(client *http.Client, projects []*cloudresourcemanager.P
 // Collect implements Prometheus' Collector inteface and is used to collect metrics
 func (c *StorageCollector) Collect(ch chan<- prometheus.Metric) {
 	ctx := context.Background()
-	storageService, err := storage.New(c.client)
+	storageService, err := storage.NewService(ctx)
 	if err != nil {
 		log.Println(err)
 		return
