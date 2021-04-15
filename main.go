@@ -95,6 +95,7 @@ func main() {
 	registry.MustRegister(collector.NewComputeCollector(resp.Projects))
 	registry.MustRegister(collector.NewCloudRunCollector(resp.Projects))
 	registry.MustRegister(collector.NewExporterCollector(OSVersion, GoVersion, GitCommit, StartTime))
+	registry.MustRegister(collector.NewFunctionsCollector(resp.Projects))
 	registry.MustRegister(collector.NewKubernetesCollector(resp.Projects))
 	registry.MustRegister(collector.NewStorageCollector(resp.Projects))
 
