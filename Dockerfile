@@ -1,4 +1,5 @@
 ARG GOLANG_VERSION=1.16
+ARG GOLANG_OPTIONS="CGO_ENABLED=0 GOOS=linux GOARCH=amd64"
 
 FROM golang:${GOLANG_VERSION} as build
 
@@ -11,7 +12,8 @@ COPY go.* ./
 COPY main.go .
 COPY collector ./collector
 
-RUN CGO_ENABLED=0 GOOS=linux \
+RUN CGO_ENABLED=0 \
+    ${GOLANG_OPTIONS} \
     go build \
     -ldflags "-X main.OSVersion=${VERSION} -X main.GitCommit=${COMMIT}" \
     -a -installsuffix cgo \
