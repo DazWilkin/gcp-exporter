@@ -12,8 +12,7 @@ COPY go.* ./
 COPY main.go .
 COPY collector ./collector
 
-RUN CGO_ENABLED=0 \
-    ${GOLANG_OPTIONS} \
+RUN env ${GOLANG_OPTIONS} \
     go build \
     -ldflags "-X main.OSVersion=${VERSION} -X main.GitCommit=${COMMIT}" \
     -a -installsuffix cgo \
