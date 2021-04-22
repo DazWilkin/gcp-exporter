@@ -5,6 +5,7 @@ import (
 	"log"
 	"sync"
 
+	"github.com/DazWilkin/gcp-exporter/gcp"
 	"github.com/prometheus/client_golang/prometheus"
 
 	"google.golang.org/api/cloudresourcemanager/v1"
@@ -14,17 +15,17 @@ import (
 
 // ComputeCollector represents Compute Engine
 type ComputeCollector struct {
-	projects []*cloudresourcemanager.Project
+	account *gcp.Account
 
 	Instances       *prometheus.Desc
 	ForwardingRules *prometheus.Desc
 }
 
 // NewComputeCollector returns a new ComputeCollector
-func NewComputeCollector(projects []*cloudresourcemanager.Project) *ComputeCollector {
+func NewComputeCollector(account *gcp.Account) *ComputeCollector {
 	fqName := name("compute_engine")
 	return &ComputeCollector{
-		projects: projects,
+		account: account,
 
 		Instances: prometheus.NewDesc(
 			fqName("instances"),
@@ -58,7 +59,7 @@ func (c *ComputeCollector) Collect(ch chan<- prometheus.Metric) {
 
 	// Enumerate all of the projects
 	var wg sync.WaitGroup
-	for _, p := range c.projects {
+	for _, p := range c.account.Projects {
 		wg.Add(1)
 		go func(p *cloudresourcemanager.Project) {
 			defer wg.Done()

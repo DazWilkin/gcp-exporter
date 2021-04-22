@@ -6,6 +6,7 @@ import (
 	"log"
 	"sync"
 
+	"github.com/DazWilkin/gcp-exporter/gcp"
 	"github.com/prometheus/client_golang/prometheus"
 
 	"google.golang.org/api/cloudresourcemanager/v1"
@@ -14,14 +15,14 @@ import (
 
 // KubernetesCollector represents Kubernetes Engine
 type KubernetesCollector struct {
-	projects []*cloudresourcemanager.Project
+	account *gcp.Account
 
 	Up    *prometheus.Desc
 	Nodes *prometheus.Desc
 }
 
 // NewKubernetesCollector creates a new KubernetesCollector
-func NewKubernetesCollector(projects []*cloudresourcemanager.Project) *KubernetesCollector {
+func NewKubernetesCollector(account *gcp.Account) *KubernetesCollector {
 	fqName := name("kubernetes_engine")
 	labelKeys := []string{
 		"name",
@@ -29,7 +30,7 @@ func NewKubernetesCollector(projects []*cloudresourcemanager.Project) *Kubernete
 		"version",
 	}
 	return &KubernetesCollector{
-		projects: projects,
+		account: account,
 
 		Up: prometheus.NewDesc(
 			fqName("cluster_up"),
@@ -56,7 +57,7 @@ func (c *KubernetesCollector) Collect(ch chan<- prometheus.Metric) {
 
 	// Enumerate all of the projects
 	var wg sync.WaitGroup
-	for _, p := range c.projects {
+	for _, p := range c.account.Projects {
 		wg.Add(1)
 		go func(p *cloudresourcemanager.Project) {
 			defer wg.Done()

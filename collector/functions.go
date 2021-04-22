@@ -8,6 +8,7 @@ import (
 	"strings"
 	"sync"
 
+	"github.com/DazWilkin/gcp-exporter/gcp"
 	"github.com/prometheus/client_golang/prometheus"
 
 	"google.golang.org/api/cloudfunctions/v1"
@@ -20,17 +21,17 @@ var (
 )
 
 type FunctionsCollector struct {
-	projects []*cloudresourcemanager.Project
+	account *gcp.Account
 
 	Functions *prometheus.Desc
 	Locations *prometheus.Desc
 	Runtimes  *prometheus.Desc
 }
 
-func NewFunctionsCollector(projects []*cloudresourcemanager.Project) *FunctionsCollector {
+func NewFunctionsCollector(account *gcp.Account) *FunctionsCollector {
 	fqName := name("cloudfunctions")
 	return &FunctionsCollector{
-		projects: projects,
+		account: account,
 
 		Functions: prometheus.NewDesc(
 			fqName("functions"),
@@ -44,6 +45,7 @@ func NewFunctionsCollector(projects []*cloudresourcemanager.Project) *FunctionsC
 			fqName("locations"),
 			"Number of Functions by Location",
 			[]string{
+				"project",
 				"location",
 			},
 			nil,
@@ -52,6 +54,7 @@ func NewFunctionsCollector(projects []*cloudresourcemanager.Project) *FunctionsC
 			fqName("runtimes"),
 			"Number of Functions by Runtime",
 			[]string{
+				"project",
 				"runtime",
 			},
 			nil,
@@ -69,7 +72,7 @@ func (c *FunctionsCollector) Collect(ch chan<- prometheus.Metric) {
 
 	// Enumerate all of the projects
 	var wg sync.WaitGroup
-	for _, p := range c.projects {
+	for _, p := range c.account.Projects {
 		wg.Add(1)
 		go func(p *cloudresourcemanager.Project) {
 			defer wg.Done()
@@ -104,8 +107,8 @@ func (c *FunctionsCollector) Collect(ch chan<- prometheus.Metric) {
 					log.Printf("[CloudFunctionsCollector] function: %s", function.Name)
 					parts := strings.Split(function.Name, "/")
 					// 0="projects",1="{project}",2="locations",3="{location}",4="functions",5="{function}"
-					if len(parts) != 5 {
-						log.Printf("Unable to parse function name: %s", function.Name)
+					if len(parts) != 6 {
+						log.Printf("[CloudFunctionsCollector] Unable to parse function name: %s", function.Name)
 					}
 					// Increment locations count by this function's location
 					locations[parts[3]]++
@@ -123,7 +126,12 @@ func (c *FunctionsCollector) Collect(ch chan<- prometheus.Metric) {
 				// Otherwise, next page
 				rqst = rqst.PageToken(resp.NextPageToken)
 			}
+
 			// Now we know the number of Functions
+			// Because this count is by project, include project labels to avoid duplication
+			// Can always total by location across projects
+			// gcp_cloudfunctions_locations{location="us-central1",project="gcp"} 1
+			// gcp_cloudfunctions_locations{location="us-central1",project="yyy"} 1
 			ch <- prometheus.MustNewConstMetric(
 				c.Functions,
 				prometheus.GaugeValue,
@@ -138,17 +146,21 @@ func (c *FunctionsCollector) Collect(ch chan<- prometheus.Metric) {
 					prometheus.GaugeValue,
 					float64(count),
 					[]string{
+						p.ProjectId,
 						location,
 					}...,
 				)
 			}
+			// Can always total by runtime across projects
+			// gcp_cloudfunctions_runtimes{project="gcp",runtime="go113"} 1
+			// gcp_cloudfunctions_runtimes{project="yyy",runtime="go113"} 1
 			for runtime, count := range runtimes {
-
 				ch <- prometheus.MustNewConstMetric(
 					c.Runtimes,
 					prometheus.GaugeValue,
 					float64(count),
 					[]string{
+						p.ProjectId,
 						runtime,
 					}...,
 				)

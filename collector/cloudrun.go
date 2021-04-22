@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"sync"
 
+	"github.com/DazWilkin/gcp-exporter/gcp"
 	"github.com/prometheus/client_golang/prometheus"
 
 	"google.golang.org/api/cloudresourcemanager/v1"
@@ -16,16 +17,16 @@ import (
 
 // CloudRunCollector represents Cloud Run
 type CloudRunCollector struct {
-	projects []*cloudresourcemanager.Project
+	account *gcp.Account
 
 	Services *prometheus.Desc
 }
 
 // NewCloudRunCollector returns a new CloudRunCollector
-func NewCloudRunCollector(projects []*cloudresourcemanager.Project) *CloudRunCollector {
+func NewCloudRunCollector(account *gcp.Account) *CloudRunCollector {
 	fqName := name("cloudrun")
 	return &CloudRunCollector{
-		projects: projects,
+		account: account,
 
 		Services: prometheus.NewDesc(
 			fqName("services"),
@@ -50,7 +51,7 @@ func (c *CloudRunCollector) Collect(ch chan<- prometheus.Metric) {
 
 	// Enumerate all of the projects
 	var wg sync.WaitGroup
-	for _, p := range c.projects {
+	for _, p := range c.account.Projects {
 		wg.Add(1)
 		go func(p *cloudresourcemanager.Project) {
 			defer wg.Done()

@@ -1,18 +1,15 @@
 package main
 
 import (
-	"context"
 	"flag"
 	"fmt"
 	"log"
 	"net/http"
-	"os"
 	"runtime"
 	"time"
 
-	"google.golang.org/api/cloudresourcemanager/v1"
-
 	"github.com/DazWilkin/gcp-exporter/collector"
+	"github.com/DazWilkin/gcp-exporter/gcp"
 
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
@@ -57,47 +54,22 @@ func main() {
 		log.Println("[main] OSVersion value unchanged: expected to be set during build")
 	}
 
+	// Objects that holds GCP-specific resources (e.g. projects)
+	account := gcp.NewAccount()
+
 	registry := prometheus.NewRegistry()
-
-	ctx := context.Background()
-	cloudresourcemanagerService, err := cloudresourcemanager.NewService(ctx)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	// Create the Projects.List request
-	// Return at most (!) '--pagesize' projects
-	// Filter the results to only include the project ID and number
-	req := cloudresourcemanagerService.Projects.List().PageSize(*pagesize).Fields("projects.projectId", "projects.projectNumber")
-	// Combine any user-specified filter with "lifecycleState:ACTIVE" to only process active projects
-	if *filter != "" {
-		*filter += " "
-	}
-	*filter = *filter + "lifecycleState:ACTIVE"
-	req = req.Filter(*filter)
-	log.Printf("[main] Projects filter: '%s'", *filter)
-	req = req.Filter(*filter)
-
-	resp, err := req.Context(ctx).Do()
-	if err != nil {
-		log.Fatal(err)
-	}
-	if resp.NextPageToken != "" {
-		// There are more projects to return but we're limiting the results to this set
-		log.Println("[main] Some projects are being excluded from the results. Refine 'filter' or increase 'max_projects'")
-	}
-	if len(resp.Projects) == 0 {
-		log.Println("[main] There are 0 projects. Nothing to do")
-		os.Exit(0)
-	}
-
-	log.Printf("[main] Exporting metrics for %d project(s)", len(resp.Projects))
-	registry.MustRegister(collector.NewComputeCollector(resp.Projects))
-	registry.MustRegister(collector.NewCloudRunCollector(resp.Projects))
 	registry.MustRegister(collector.NewExporterCollector(OSVersion, GoVersion, GitCommit, StartTime))
-	registry.MustRegister(collector.NewFunctionsCollector(resp.Projects))
-	registry.MustRegister(collector.NewKubernetesCollector(resp.Projects))
-	registry.MustRegister(collector.NewStorageCollector(resp.Projects))
+
+	// ProjectCollector is a special case
+	// When it runs it replaces the Exporter's list of GCP projects
+	// The other collectors are dependent on this list of projects
+	registry.MustRegister(collector.NewProjectsCollector(account, *filter, *pagesize))
+
+	registry.MustRegister(collector.NewComputeCollector(account))
+	registry.MustRegister(collector.NewCloudRunCollector(account))
+	registry.MustRegister(collector.NewFunctionsCollector(account))
+	registry.MustRegister(collector.NewKubernetesCollector(account))
+	registry.MustRegister(collector.NewStorageCollector(account))
 
 	mux := http.NewServeMux()
 	mux.Handle("/", http.HandlerFunc(handleRoot))

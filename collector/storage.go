@@ -5,6 +5,7 @@ import (
 	"log"
 	"sync"
 
+	"github.com/DazWilkin/gcp-exporter/gcp"
 	"github.com/prometheus/client_golang/prometheus"
 
 	"google.golang.org/api/cloudresourcemanager/v1"
@@ -13,16 +14,16 @@ import (
 
 // StorageCollector represents Cloud Storage
 type StorageCollector struct {
-	projects []*cloudresourcemanager.Project
+	account *gcp.Account
 
 	Buckets *prometheus.Desc
 }
 
 // NewStorageCollector returns a StorageCollector
-func NewStorageCollector(projects []*cloudresourcemanager.Project) *StorageCollector {
+func NewStorageCollector(account *gcp.Account) *StorageCollector {
 	fqName := name("storage")
 	return &StorageCollector{
-		projects: projects,
+		account: account,
 
 		Buckets: prometheus.NewDesc(
 			fqName("buckets"),
@@ -47,7 +48,7 @@ func (c *StorageCollector) Collect(ch chan<- prometheus.Metric) {
 
 	// Enumerate all of the projects
 	var wg sync.WaitGroup
-	for _, p := range c.projects {
+	for _, p := range c.account.Projects {
 		wg.Add(1)
 		go func(p *cloudresourcemanager.Project) {
 			defer wg.Done()
