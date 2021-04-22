@@ -11,6 +11,7 @@ WORKDIR /gcp-exporter
 COPY go.* ./
 COPY main.go .
 COPY collector ./collector
+COPY gcp ./gcp
 
 RUN env ${GOLANG_OPTIONS} \
     go build \
