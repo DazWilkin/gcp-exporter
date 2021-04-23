@@ -9,6 +9,7 @@ import (
 	"google.golang.org/api/cloudresourcemanager/v1"
 )
 
+// ProjectsCollector represents Google Cloud Platform projects
 type ProjectsCollector struct {
 	filter   string
 	pagesize int64
@@ -18,6 +19,7 @@ type ProjectsCollector struct {
 	Count *prometheus.Desc
 }
 
+// NewProjectsCollector returns a new ProjectsCollector
 func NewProjectsCollector(account *gcp.Account, filter string, pagesize int64) *ProjectsCollector {
 	fqName := name("projects")
 	return &ProjectsCollector{
@@ -33,6 +35,8 @@ func NewProjectsCollector(account *gcp.Account, filter string, pagesize int64) *
 		),
 	}
 }
+
+// Collect implements Prometheus' Collector interface and is used to collect metrics
 func (c *ProjectsCollector) Collect(ch chan<- prometheus.Metric) {
 	ctx := context.Background()
 	cloudresourcemanagerService, err := cloudresourcemanager.NewService(ctx)
@@ -90,6 +94,8 @@ func (c *ProjectsCollector) Collect(ch chan<- prometheus.Metric) {
 	)
 
 }
+
+// Collect implements Prometheus' Collector interface and is used to desribe metrics
 func (c *ProjectsCollector) Describe(ch chan<- *prometheus.Desc) {
 	ch <- c.Count
 }
