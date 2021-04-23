@@ -81,10 +81,10 @@ func (c *ComputeCollector) Collect(ch chan<- prometheus.Metric) {
 					wg.Add(1)
 					go func(z *compute.Zone) {
 						defer wg.Done()
-						req := computeService.Instances.List(p.ProjectId, z.Name).MaxResults(500)
+						rqst := computeService.Instances.List(p.ProjectId, z.Name).MaxResults(500)
 						count := 0
 						// Page through more results
-						if err := req.Pages(ctx, func(page *compute.InstanceList) error {
+						if err := rqst.Pages(ctx, func(page *compute.InstanceList) error {
 							count += len(page.Items)
 							// for _, instance := range page.Items {
 							// 	instance.
@@ -127,9 +127,9 @@ func (c *ComputeCollector) Collect(ch chan<- prometheus.Metric) {
 					wg.Add(1)
 					go func(r *compute.Region) {
 						defer wg.Done()
-						req := computeService.ForwardingRules.List(p.ProjectId, r.Name).MaxResults(500)
+						rqst := computeService.ForwardingRules.List(p.ProjectId, r.Name).MaxResults(500)
 						count := 0
-						if err := req.Pages(ctx, func(page *compute.ForwardingRuleList) error {
+						if err := rqst.Pages(ctx, func(page *compute.ForwardingRuleList) error {
 							count += len(page.Items)
 							return nil
 						}); err != nil {
