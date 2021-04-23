@@ -65,10 +65,10 @@ func (c *CloudRunCollector) Collect(ch chan<- prometheus.Metric) {
 			rqst := cloudrunService.Namespaces.Services.List(Parent(p.ProjectId))
 
 			// Do request at least once
-			continue_ := ""
+			cont := ""
 			count := 0
 			for {
-				rqst.Continue(continue_)
+				rqst.Continue(cont)
 				resp, err := rqst.Do()
 				if err != nil {
 					if e, ok := err.(*googleapi.Error); ok {
@@ -86,7 +86,7 @@ func (c *CloudRunCollector) Collect(ch chan<- prometheus.Metric) {
 
 				if resp.Metadata != nil {
 					// If there's Metadata, update continue_
-					continue_ = resp.Metadata.Continue
+					cont = resp.Metadata.Continue
 				} else {
 					// Otherwise, we're done
 					break
