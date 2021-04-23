@@ -20,6 +20,7 @@ var (
 	_ prometheus.Collector = (*FunctionsCollector)(nil)
 )
 
+// FunctionsCollector represents Cloud Functions
 type FunctionsCollector struct {
 	account *gcp.Account
 
@@ -28,6 +29,7 @@ type FunctionsCollector struct {
 	Runtimes  *prometheus.Desc
 }
 
+// NewFunctionsCollector returns a new FunctionsCollector
 func NewFunctionsCollector(account *gcp.Account) *FunctionsCollector {
 	fqName := name("cloudfunctions")
 	return &FunctionsCollector{
@@ -62,6 +64,7 @@ func NewFunctionsCollector(account *gcp.Account) *FunctionsCollector {
 	}
 }
 
+// Collect implements Prometheus' Collector interface and is used to collect metrics
 func (c *FunctionsCollector) Collect(ch chan<- prometheus.Metric) {
 	ctx := context.Background()
 	cloudfunctionsservice, err := cloudfunctions.NewService(ctx)
@@ -169,6 +172,8 @@ func (c *FunctionsCollector) Collect(ch chan<- prometheus.Metric) {
 	}
 
 }
+
+// Describe implements Prometheus' Collector interface and is used to describe metrics
 func (c *FunctionsCollector) Describe(ch chan<- *prometheus.Desc) {
 	ch <- c.Functions
 }
