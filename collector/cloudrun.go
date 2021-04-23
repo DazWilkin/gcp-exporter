@@ -112,6 +112,8 @@ func (c *CloudRunCollector) Collect(ch chan<- prometheus.Metric) {
 func (c *CloudRunCollector) Describe(ch chan<- *prometheus.Desc) {
 	ch <- c.Services
 }
+
+// Parent is a function that returns the correct parent value for the Cloud Run services list method
 func Parent(project string) string {
 	return fmt.Sprintf("namespaces/%s", project)
 }
