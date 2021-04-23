@@ -20,9 +20,8 @@ RUN env ${GOLANG_OPTIONS} \
     -o /go/bin/gcp-exporter \
     ./main.go
 
-FROM scratch
+FROM gcr.io/distroless/base-debian10
 
-COPY --from=build /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/ca-certificates.crt
 COPY --from=build /go/bin/gcp-exporter /
 
 EXPOSE 9402
