@@ -2,6 +2,7 @@
 
 [![build-container](https://github.com/DazWilkin/gcp-exporter/actions/workflows/build-container.yaml/badge.svg)](https://github.com/DazWilkin/gcp-exporter/actions/workflows/build-container.yaml)
 [![Go Reference](https://pkg.go.dev/badge/github.com/DazWilkin/gcp-exporter.svg)](https://pkg.go.dev/github.com/DazWilkin/gcp-exporter)
+[![Go Report Card](https://goreportcard.com/badge/github.com/dazwilkin/gcp-exporter)](https://goreportcard.com/report/github.com/dazwilkin/gcp-exporter)
 
 I want to be able to monitor my resource consumption across multiple cloud platforms ([GCP](https://cloud.google.com), [Digital Ocean](https://digitalocean.com) and [Linode](https://linode.com)). I was inspired by [@metalmatze](https://github.com/metalmatze)'s [DigitalOcean Exporter](https://github.com/metalmatze/digitalocean_exporter) and, with this exporter, have the three that I need:
 
@@ -104,9 +105,26 @@ kubectl apply \
 
 # NB This must be installed to 'monitoring' namespace
 kubectl apply --filename=./kubernetes.rule.yaml  --namespace=monitoring
-
-
 ```
+
+## Raspberry Pi
+
+Learning about multi-arch builds to run on Raspberry Pi 4.
+
+Unsure how to use `docker manifest` with GitHub Actions as this model has been suplanted by `docker buildx` (that I don't want to use).
+
+Refactored `Dockerfile` to take a build argument `GOLANG_OPTIONS` (default=`CGO_ENABLED=0 GOOS=linux GOARCH=amd64`)
+
+```bash
+docker build \
+--build-arg=GOLANG_OPTIONS="CGO_ENABLED=0 GOOS=linux GOARCH=arm GOARM=7" \
+--tag=ghcr.io/dazwilkin/gcp-exporter:arm32v7 \
+--file=./Dockerfile \
+.
+```
+
+> **NOTE** See [environment variables](https://golang.org/doc/install/source#environment)
+
 
 ## Develop
 
