@@ -95,7 +95,7 @@ func (c *ProjectsCollector) Collect(ch chan<- prometheus.Metric) {
 
 }
 
-// Collect implements Prometheus' Collector interface and is used to desribe metrics
+// Describe implements Prometheus' Collector interface and is used to desribe metrics
 func (c *ProjectsCollector) Describe(ch chan<- *prometheus.Desc) {
 	ch <- c.Count
 }
