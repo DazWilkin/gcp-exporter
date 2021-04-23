@@ -7,6 +7,7 @@ import (
 	"google.golang.org/api/cloudresourcemanager/v1"
 )
 
+// Account represents a Google Cloud Platform account
 type Account struct {
 	mu sync.Mutex
 
@@ -14,6 +15,7 @@ type Account struct {
 	Projects []*cloudresourcemanager.Project
 }
 
+// NewAccount creates a new Account
 func NewAccount() *Account {
 	projects := []*cloudresourcemanager.Project{}
 	return &Account{
