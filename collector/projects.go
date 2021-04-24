@@ -22,6 +22,14 @@ type ProjectsCollector struct {
 // NewProjectsCollector returns a new ProjectsCollector
 func NewProjectsCollector(account *gcp.Account, filter string, pagesize int64) *ProjectsCollector {
 	fqName := name("projects")
+
+	// Combine any user-specified filter with "lifecycleState:ACTIVE" to only process active projects
+	if filter != "" {
+		filter += " "
+	}
+	filter = filter + "lifecycleState:ACTIVE"
+	log.Printf("Projects filter: '%s'", filter)
+
 	return &ProjectsCollector{
 		filter:   filter,
 		pagesize: pagesize,
@@ -48,15 +56,7 @@ func (c *ProjectsCollector) Collect(ch chan<- prometheus.Metric) {
 	// Create the Projects.List request
 	// Return at most (!) '--pagesize' projects
 	// Filter the results to only include the project ID and number
-	req := cloudresourcemanagerService.Projects.List().PageSize(c.pagesize).Fields("projects.projectId", "projects.projectNumber")
-	// Combine any user-specified filter with "lifecycleState:ACTIVE" to only process active projects
-	if c.filter != "" {
-		c.filter += " "
-	}
-	c.filter = c.filter + "lifecycleState:ACTIVE"
-	req = req.Filter(c.filter)
-	log.Printf("Projects filter: '%s'", c.filter)
-	req = req.Filter(c.filter)
+	req := cloudresourcemanagerService.Projects.List().PageSize(c.pagesize).Fields("projects.projectId", "projects.projectNumber").Filter(c.filter)
 
 	projects := []*cloudresourcemanager.Project{}
 
