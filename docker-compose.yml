@@ -18,6 +18,19 @@ services:
     ports:
       - 8085:8080
 
+  node-exporter:
+    restart: unless-stopped
+    image: prom/node-exporter:v1.1.2
+    container_name: node_exporter
+    command:
+      - '--path.rootfs=/host'
+    volumes:
+      - '/:/host:ro,rslave'
+    expose:
+    - "9100"
+    ports:
+    - 9100:9100
+
   prometheus:
     restart: always
     depends_on:
@@ -63,3 +76,11 @@ services:
       - "9402"
     ports:
       - 9402:9402
+
+  gcp-status:
+    image: ghcr.io/dazwilkin/gcp-status:e18a9c39494e3fc13f31a696a7703c97ba2a5017
+    container_name: gcp-status
+    expose:
+      - "9989"
+    ports:
+      - 9989:9989
