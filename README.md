@@ -12,15 +12,15 @@ I want to be able to monitor my resource consumption across multiple cloud platf
 
 Result:
 
-![](./images/prometheus.targets.png)
-![](./images/prometheus.rules.png)
-![](./images/prometheus.alerts.png)
+![Prometheus: Targets](./images/prometheus.targets.png)
+![Prometheus: Rules](./images/prometheus.rules.png)
+![Prometheus: Alerts](./images/prometheus.alerts.png)
 
 And:
 
-![](./images/alertmanager.quiet.png)
-![](./images/alertmanager.firing.png)
-![](./images/gmail.png)
+![AlertManager: Quiet](./images/alertmanager.quiet.png)
+![AlertManager: Firing](./images/alertmanager.firing.png)
+![AlertManager: Gmail](./images/gmail.png)
 
 ## Installation
 
@@ -124,7 +124,6 @@ docker build \
 ```
 
 > **NOTE** See [environment variables](https://golang.org/doc/install/source#environment)
-
 
 ## Develop
 
