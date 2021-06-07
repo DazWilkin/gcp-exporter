@@ -170,7 +170,7 @@ func (c *FunctionsCollector) Collect(ch chan<- prometheus.Metric) {
 			}
 		}(p)
 	}
-
+	wg.Wait()
 }
 
 // Describe implements Prometheus' Collector interface and is used to describe metrics
