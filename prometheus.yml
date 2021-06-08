@@ -26,8 +26,21 @@ scrape_configs:
       - targets:
           - "gcp-exporter:9402"
 
+  # GCP Status
+  - job_name: "gcp-status"
+    scrape_interval: 15m # Reduced frequency for GCP
+    static_configs:
+      - targets:
+          - "gcp-status:9989"
+
   # cAdvisor exports metrics for *all* containers running on this host
   - job_name: cadvisor
     static_configs:
       - targets:
           - "cadvisor:8080"
+
+  # Node Exporter
+  - job_name: node-exporter
+    static_configs:
+      - targets:
+          - "node-exporter:9100"
