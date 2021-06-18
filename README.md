@@ -156,3 +156,7 @@ Using Google's (now legacy) API Client Libraries. The current Cloud Client Libra
 + Google [Compute Engine API](https://cloud.google.com/compute/docs/reference/rest/)
 + Google [Resource Manager API](https://cloud.google.com/resource-manager/reference/rest/) && [GoDoc](https://godoc.org/google.golang.org/api/cloudresourcemanager/v1)
 + Google [Kubernetes Engine (Container) API](https://cloud.google.com/kubernetes-engine/docs/reference/rest/) && [GoDoc](https://godoc.org/google.golang.org/api/container/v1)
+
+<hr/>
+<br/>
+<a href="https://www.buymeacoffee.com/dazwilkin" target="_blank"><img src="https://cdn.buymeacoffee.com/buttons/default-orange.png" alt="Buy Me A Coffee" height="41" width="174"></a>
