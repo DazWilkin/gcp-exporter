@@ -64,7 +64,8 @@ func (c *ProjectsCollector) Collect(ch chan<- prometheus.Metric) {
 	for {
 		resp, err := req.Context(ctx).Do()
 		if err != nil {
-			log.Fatal(err)
+			log.Println("Unable to list projects")
+			return
 		}
 
 		if len(resp.Projects) == 0 {
