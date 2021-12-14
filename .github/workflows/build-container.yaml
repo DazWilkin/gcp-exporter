@@ -39,7 +39,12 @@ jobs:
         run: echo "${{ secrets.SIGNING }}" > ./cosign.key
       - name: Sign container image
         run: |
-          cosign sign --key=./cosign.key \
+          cosign sign \
+          --key=./cosign.key \
+          --annotations="repo=${{ github.repository }}" \
+          --annotations="workflow=${{ github.workflow }}" \
+          --annotations="commit=${{ github.sha }}" \
+          --annotations="version=${{ env.VERSION }}" \
           ghcr.io/${{ env.REPO }}:${{ github.sha }}
         env:
           COSIGN_PASSWORD: ""

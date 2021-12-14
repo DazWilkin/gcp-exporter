@@ -55,6 +55,24 @@ docker run \
 ghcr.io/dazwilkin/gcp-exporter:990ed3ea567db43c244e219dbd58796a1aa660eb
 ```
 
+### [Sigstore](https://sigstore.dev)
+
+`gcp-exporter` container images are being signed by `cosign` and may be verified:
+
+```bash
+cosign verify \
+--key=./cosign.pub \
+ghcr.io/dazwilkin/gcp-exporter:791ce3aa34236682e41268a74785daaa30db52d1
+```
+
+> **NOTE** `cosign.pub` is [here](./cosign.pub)
+
+`cosign` may be installed, e.g.:
+
+```bash
+go install github.com/sigstore/cosign/cmd/cosign@latest
+```
+
 ### Docker Compose
 
 ```bash
