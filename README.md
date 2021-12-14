@@ -52,22 +52,22 @@ docker run \
 --publish=${PORT}:${PORT} \
 --volume=${CREDENTIALS}:/secrets/client_secrets.json \
 --env=GOOGLE_APPLICATION_CREDENTIALS=/secrets/client_secrets.json \
-ghcr.io/dazwilkin/gcp-exporter:990ed3ea567db43c244e219dbd58796a1aa660eb
+ghcr.io/dazwilkin/gcp-exporter:b8b593cb70ab28d68bfea2f8921651ec5811b2eb
 ```
 
-### [Sigstore](https://sigstore.dev)
+### [Sigstore](https://www.sigstore.dev/)
 
-`gcp-exporter` container images are being signed by `cosign` and may be verified:
+`gcp-exporter` container images are being signed by Sigstore and may be verified:
 
 ```bash
 cosign verify \
 --key=./cosign.pub \
-ghcr.io/dazwilkin/gcp-exporter:791ce3aa34236682e41268a74785daaa30db52d1
+ghcr.io/dazwilkin/gcp-exporter:b8b593cb70ab28d68bfea2f8921651ec5811b2eb
 ```
 
-> **NOTE** `cosign.pub` is [here](./cosign.pub)
+> **NOTE** `cosign.pub` may be downloaded [here](./cosign.pub)
 
-`cosign` may be installed, e.g.:
+To install `cosign`, e.g.:
 
 ```bash
 go install github.com/sigstore/cosign/cmd/cosign@latest
@@ -83,7 +83,7 @@ docker-compose up
 
 ```YAML
 gcp-exporter:
-  image: ghcr.io/dazwilkin/gcp-exporter:990ed3ea567db43c244e219dbd58796a1aa660eb
+  image: ghcr.io/dazwilkin/gcp-exporter:b8b593cb70ab28d68bfea2f8921651ec5811b2eb
   container_name: gcp-exporter
   environment:
   - GOOGLE_APPLICATION_CREDENTIALS=/secrets/client_secrets.json
