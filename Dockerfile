@@ -22,6 +22,8 @@ RUN env ${GOLANG_OPTIONS} \
 
 FROM gcr.io/distroless/base-debian10
 
+LABEL org.opencontainers.image.source https://github.com/DazWilkin/gcp-exporter
+
 COPY --from=build /go/bin/gcp-exporter /
 
 EXPOSE 9402
