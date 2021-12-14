@@ -2,5 +2,8 @@
 alertmanager.yml
 kubernetes.alerting.yaml
 
+# Cosign
+cosign.key
+
 # Visual Studio Code config
 .vscode/
