@@ -34,6 +34,15 @@ jobs:
             COMMIT=${{ github.sha }}
           tags: ghcr.io/${{ env.REPO }}:${{ github.sha }}
           push: true
+      - uses: sigstore/cosign-installer@main
+      - name: Write signing key to disk (only needed for `cosign sign --key`)
+        run: echo "${{ secrets.SIGNING }}" > cosign.key
+      - name: Sign container image
+        run: |
+          cosign sign -key cosign.key \
+          ghcr.io/${{ env.REPO }}:${{ github.sha }}
+        env:
+          COSIGN_PASSWORD: ""
       - name: revise occurrences of the image
         run: |
           git config --local user.email "action@github.com"
