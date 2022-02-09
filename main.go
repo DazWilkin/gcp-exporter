@@ -32,11 +32,11 @@ var (
 	metricsPath = flag.String("path", "/metrics", "The path on which Prometheus metrics will be served")
 )
 
-func handleHealthz(w http.ResponseWriter, r *http.Request) {
+func handleHealthz(w http.ResponseWriter, _ *http.Request) {
 	w.WriteHeader(http.StatusOK)
 	w.Write([]byte("ok"))
 }
-func handleRoot(w http.ResponseWriter, r *http.Request) {
+func handleRoot(w http.ResponseWriter, _ *http.Request) {
 	w.Header().Set("Content-Type", "text/html; charset=UTF-8")
 	fmt.Fprint(w, "<h2>Google Cloud Platform Resources Exporter</h2>")
 	fmt.Fprint(w, "<ul>")
@@ -65,8 +65,10 @@ func main() {
 	// The other collectors are dependent on this list of projects
 	registry.MustRegister(collector.NewProjectsCollector(account, *filter, *pagesize))
 
+	registry.MustRegister(collector.NewArtifactRegistryCollector(account))
 	registry.MustRegister(collector.NewComputeCollector(account))
 	registry.MustRegister(collector.NewCloudRunCollector(account))
+	registry.MustRegister(collector.NewEndpointsCollector(account))
 	registry.MustRegister(collector.NewFunctionsCollector(account))
 	registry.MustRegister(collector.NewKubernetesCollector(account))
 	registry.MustRegister(collector.NewStorageCollector(account))
