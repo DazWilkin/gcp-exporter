@@ -143,6 +143,59 @@ docker build \
 
 > **NOTE** See [environment variables](https://golang.org/doc/install/source#environment)
 
+### Podman
+
+> **NOTE** minimal set of containers pending cAdvisor support for Podman. See cAdvisor [Issue #2424](https://github.com/google/cadvisor/issues/2424) and [Pull #3021](https://github.com/google/cadvisor/pull/3021)
+
+```bash
+POD="exporter"
+
+# 8080: cAdvisor (Unavailabe)
+# 9090: Prometheus
+# 9093: AlertManager
+# 9402: GCP Exporter
+# 9100: Node Exporter
+podman pod create \
+--name=${POD} \
+--publish=9090:9090 \
+--publish=9093:9093 \
+--publish=9402:9402 \
+--publish=9100:9100
+
+podman run \
+--detach --tty --rm \
+--pod=${POD} \
+--name=prometheus \
+--volume=${PWD}/prometheus.yml:/etc/prometheus/prometheus.yml \
+--volume=${PWD}/rules.yml:/etc/alertmanager.yml \
+docker.io/prom/prometheus:v2.26.0 \
+  --config.file=/etc/prometheus/prometheus.yml \
+  --web.enable-lifecycle
+
+podman run \
+--detach --tty --rm \
+--pod=${POD} \
+--name=alertmanager \
+--volume=${PWD}/alertmanager.yml:/etc/alertmanager/alertmanager.yml \
+docker.io/prom/alertmanager:v0.21.0
+
+podman run \
+--detach --tty --rm \
+--pod=${POD} \
+--name=gcp-exporter \
+--env=GOOGLE_APPLICATION_CREDENTIALS=/secrets/key.json \
+--volume=/home/pi/.config/gcloud/application_default_credentials.json:/secrets/key.json \
+ghcr.io/dazwilkin/gcp-exporter:ad083d1ce25968c126b965b5d8fadbff411e15fa
+
+podman run \
+--detach --tty --rm \
+--name=node-exporter \
+--pod=${POD} \
+--volume=/:/host:ro,rslave \
+docker.io/prom/node-exporter:v1.1.2 \
+  --path.rootfs=/host
+```
+
 ## Develop
 
 ```bash
