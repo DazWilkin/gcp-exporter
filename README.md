@@ -219,6 +219,14 @@ Please file issues
 | ----                                       | ------- | -----------
 | `gcp_exporter_buildinfo`                   | Counter | A metric with a constant '1' value labeled by OS version, Go version, and the Git commit of the exporter
 | `gcp_exporter_startime`                    | Gauge   | Exporter start time in Unix epoch seconds
+| `gcp_artifact_registry_registries`         | Gauge   | Number of Artifact Registry registries
+| `gcp_artifact_registry_locations`          | Gauge   | Number of Artifact Registry locations
+| `gcp_artifact_registry_formats`            | Gauge   | Number of Artifact Registry formats
+| `gcp_cloud_endpoints_services`             | Gauge   | Number of Cloud Endpoints services
+| `gcp_cloud_functions_functions`            | Gauge   | Number of Cloud Functions functions
+| `gcp_cloud_functions_locations`            | Gauge   | Number of Cloud Functions locations
+| `gcp_cloud_functions_runtimes`             | Gauge   | Number of Cloud Functions runtimes
+| `gcp_cloud_run_services`                   | Gauge   | Number of Cloud Run services
 | `gcp_compute_engine_instances`             | Gauge   | Number of instances
 | `gcp_compute_engine_forwardingrules`       | Gauge   | Number of forwardingrules
 | `gcp_kubernetes_engine_cluster_up`         | Gauge   | 1 if the cluster is running, 0 otherwise
