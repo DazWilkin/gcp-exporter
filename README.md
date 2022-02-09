@@ -134,8 +134,17 @@ Unsure how to use `docker manifest` with GitHub Actions as this model has been s
 Refactored `Dockerfile` to take a build argument `GOLANG_OPTIONS` (default=`CGO_ENABLED=0 GOOS=linux GOARCH=amd64`)
 
 ```bash
+if [ "$(getconf LONG_BIT)" -eq 64 ]
+then
+  # 64-bit Raspian
+  ARCH="GOARCH=arm64"
+else
+  # 32-bit Raspian
+  ARCH="GOARCH=arm GOARM=7"
+fi
+
 docker build \
---build-arg=GOLANG_OPTIONS="CGO_ENABLED=0 GOOS=linux GOARCH=arm GOARM=7" \
+--build-arg=GOLANG_OPTIONS="CGO_ENABLED=0 GOOS=linux ${ARCH}" \
 --tag=ghcr.io/dazwilkin/gcp-exporter:arm32v7 \
 --file=./Dockerfile \
 .
