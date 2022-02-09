@@ -80,8 +80,8 @@ func (c *ArtifactRegistryCollector) Collect(ch chan<- prometheus.Metric) {
 		go func(p *cloudresourcemanager.Project) {
 			defer wg.Done()
 			log.Printf("[ArtifactRegistryCollector] Project: %s", p.ProjectId)
-
-			rqst := artifactregistryService.Projects.Locations.List("")
+			name := fmt.Sprintf("projects/%s", p.ProjectId)
+			rqst := artifactregistryService.Projects.Locations.List(name)
 			resp, err := rqst.Do()
 			if err != nil {
 				if e, ok := err.(*googleapi.Error); ok {
