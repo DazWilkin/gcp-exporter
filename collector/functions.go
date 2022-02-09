@@ -31,7 +31,7 @@ type FunctionsCollector struct {
 
 // NewFunctionsCollector returns a new FunctionsCollector
 func NewFunctionsCollector(account *gcp.Account) *FunctionsCollector {
-	fqName := name("cloudfunctions")
+	fqName := name("cloud_functions")
 	return &FunctionsCollector{
 		account: account,
 
@@ -79,7 +79,7 @@ func (c *FunctionsCollector) Collect(ch chan<- prometheus.Metric) {
 		wg.Add(1)
 		go func(p *cloudresourcemanager.Project) {
 			defer wg.Done()
-			log.Printf("[CloudFunctionsCollector] Projects: %s", p.ProjectId)
+			log.Printf("[CloudFunctionsCollector] Project: %s", p.ProjectId)
 			parent := fmt.Sprintf("projects/%s/locations/-", p.ProjectId)
 			rqst := cloudfunctionsservice.Projects.Locations.Functions.List(parent)
 
@@ -96,7 +96,7 @@ func (c *FunctionsCollector) Collect(ch chan<- prometheus.Metric) {
 							// Probably (!) Cloud Functions API has not been enabled for Project (p)
 							return
 						}
-						log.Printf("Google API Error: %d [%s}", e.Code, e.Message)
+						log.Printf("Google API Error: %d [%s]", e.Code, e.Message)
 					}
 					log.Println(err)
 					return

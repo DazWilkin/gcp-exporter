@@ -15,6 +15,10 @@ import (
 	"google.golang.org/api/run/v1"
 )
 
+var (
+	_ prometheus.Collector = (*CloudRunCollector)(nil)
+)
+
 // CloudRunCollector represents Cloud Run
 type CloudRunCollector struct {
 	account *gcp.Account
@@ -24,7 +28,7 @@ type CloudRunCollector struct {
 
 // NewCloudRunCollector returns a new CloudRunCollector
 func NewCloudRunCollector(account *gcp.Account) *CloudRunCollector {
-	fqName := name("cloudrun")
+	fqName := name("cloud_run")
 	return &CloudRunCollector{
 		account: account,
 
