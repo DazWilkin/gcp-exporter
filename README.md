@@ -138,14 +138,18 @@ if [ "$(getconf LONG_BIT)" -eq 64 ]
 then
   # 64-bit Raspian
   ARCH="GOARCH=arm64"
+  TAG="arm64"
 else
   # 32-bit Raspian
   ARCH="GOARCH=arm GOARM=7"
+  TAG="arm32v7"
 fi
 
 docker build \
 --build-arg=GOLANG_OPTIONS="CGO_ENABLED=0 GOOS=linux ${ARCH}" \
---tag=ghcr.io/dazwilkin/gcp-exporter:arm32v7 \
+--build-arg=COMMIT=$(git rev-parse HEAD) \
+--build-arg=VERSION=$(uname --kernel-release) \
+--tag=ghcr.io/dazwilkin/gcp-exporter:${TAG} \
 --file=./Dockerfile \
 .
 ```
