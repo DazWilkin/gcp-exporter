@@ -1,6 +1,36 @@
 groups:
   - name: GCPExporter
     rules:
+      - alert: GCPArtifactRegistryRepositories
+        expr: min_over_time(gcp_artifact_registry_repositories{}[15m]) > 0
+        for: 60m
+        labels:
+          severity: page
+        annotations:
+          summary: GCP Artifact Registry repositories exist
+      - alert: GCPCloudEndpointsServices
+        expr: min_over_time(gcp_cloud_endpoints_services{}[15m]) > 0
+        for: 60m
+        labels:
+          severity: page
+        annotations:
+          summary: GCP Cloud Endpoints services deployed
+      - alert: GCPCloudFunctionsRunning
+        # `15m` matches the prometheus.yml scrape_interval
+        expr: min_over_time(gcp_cloud_functions_functions{}[15m]) > 0
+        for: 60m
+        labels:
+          severity: page
+        annotations:
+          summary: GCP Cloud Functions running
+      - alert: GCPCloudRunServicesRunning
+        # `15m` matches the prometheus.yml scrape_interval
+        expr: min_over_time(gcp_cloud_run_services{}[15m]) > 0
+        for: 60m
+        labels:
+          severity: page
+        annotations:
+          summary: GCP Cloud Run services running
       - alert: GCPInstancesRunning
         expr: gcp_compute_engine_instances{} > 0
         for: 60m
@@ -30,22 +60,6 @@ groups:
       #     severity: warning
       #   annotations:
       #     summary: GCP Storage buckets exist
-      - alert: GCPCloudRunServicesRunning
-        # `15m` matches the prometheus.yml scrape_interval
-        expr: min_over_time(gcp_cloudrun_services{}[15m]) > 0
-        for: 60m
-        labels:
-          severity: warning
-        annotations:
-          summary: GCP Cloud Run services running
-      - alert: GCPCloudFunctionsRunning
-        # `15m` matches the prometheus.yml scrape_interval
-        expr: min_over_time(gcp_cloudfunctions_functions{}[15m]) > 0
-        for: 60m
-        labels:
-          severity: warning
-        annotations:
-          summary: GCP Cloud Functions running
   - name: GCPStatus
     rules:
       - alert: GCPStatusServices
