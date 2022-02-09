@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"net/http"
 	"sync"
 
 	"github.com/DazWilkin/gcp-exporter/gcp"
@@ -11,6 +12,7 @@ import (
 
 	"google.golang.org/api/cloudresourcemanager/v1"
 	"google.golang.org/api/container/v1"
+	"google.golang.org/api/googleapi"
 )
 
 // KubernetesCollector represents Kubernetes Engine
@@ -65,6 +67,14 @@ func (c *KubernetesCollector) Collect(ch chan<- prometheus.Metric) {
 			parent := fmt.Sprintf("projects/%s/locations/-", p.ProjectId)
 			resp, err := containerService.Projects.Locations.Clusters.List(parent).Context(ctx).Do()
 			if err != nil {
+				if e, ok := err.(*googleapi.Error); ok {
+					if e.Code == http.StatusForbidden {
+						// Probably (!) Kubernetes Engine API has not been enabled for Project (p)
+						return
+					}
+					log.Printf("Google API Error: %d [%s]", e.Code, e.Message)
+				}
+
 				log.Println(err)
 				return
 			}
