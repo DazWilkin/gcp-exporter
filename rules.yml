@@ -2,6 +2,7 @@ groups:
   - name: GCPExporter
     rules:
       - alert: GCPArtifactRegistryRepositories
+        # `15m` matches the prometheus.yml scrape_interval
         expr: min_over_time(gcp_artifact_registry_repositories{}[15m]) > 0
         for: 60m
         labels:
@@ -9,6 +10,7 @@ groups:
         annotations:
           summary: GCP Artifact Registry repositories exist
       - alert: GCPCloudEndpointsServices
+        # `15m` matches the prometheus.yml scrape_interval
         expr: min_over_time(gcp_cloud_endpoints_services{}[15m]) > 0
         for: 60m
         labels:
