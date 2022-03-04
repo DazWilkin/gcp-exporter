@@ -189,7 +189,7 @@ podman run \
 --detach --tty --rm \
 --pod=${POD} \
 --name=alertmanager \
---volume=${PWD}/alertmanager.yml:/etc/alertmanager/alertmanager.yml \
+--volume=${PWD}/alertmanager.yml:/etc/alertmanager/alertmanager/rules.yml \
 docker.io/prom/alertmanager:v0.21.0
 
 podman run \
