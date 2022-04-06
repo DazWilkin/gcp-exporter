@@ -180,7 +180,7 @@ podman run \
 --pod=${POD} \
 --name=prometheus \
 --volume=${PWD}/prometheus.yml:/etc/prometheus/prometheus.yml \
---volume=${PWD}/rules.yml:/etc/alertmanager.yml \
+--volume=${PWD}/rules.yml:/etc/alertmanager/rules.yml \
 docker.io/prom/prometheus:v2.26.0 \
   --config.file=/etc/prometheus/prometheus.yml \
   --web.enable-lifecycle
