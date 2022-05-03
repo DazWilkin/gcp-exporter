@@ -19,6 +19,12 @@ scrape_configs:
       - targets:
           - "localhost:9090"
 
+  # Alertmanager
+  - job_name: "alertmanager"
+    static_configs:
+      - targets:
+          - "alertmanager:9093"
+
   # GCP Exporter
   - job_name: "gcp-exporter"
     scrape_interval: 15m # Reduced frequency for GCP
