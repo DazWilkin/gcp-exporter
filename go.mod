@@ -4,7 +4,7 @@ go 1.18
 
 require (
 	github.com/prometheus/client_golang v1.12.1
-	google.golang.org/api v0.77.0
+	google.golang.org/api v0.78.0
 )
 
 require (
