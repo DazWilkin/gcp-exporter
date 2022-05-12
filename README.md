@@ -237,6 +237,36 @@ Please file issues
 | `gcp_kubernetes_engine_cluster_nodes`      | Gauge   | Number of nodes currently in the cluster
 | `gcp_storage_buckets`                      | Gauge   | Number of buckets
 
+## Prometheus API
+
+```bash
+curl \
+--silent \
+http://localhost:9090/api/v1/label/__name__/values \
+| jq -r .data[] | awk '/^gcp/ {print}'
+```
+
+Yields:
+
+```console
+gcp_artifact_registry_formats
+gcp_artifact_registry_locations
+gcp_artifact_registry_registries
+gcp_cloud_endpoints_services
+gcp_cloud_functions_functions
+gcp_cloud_functions_locations
+gcp_cloud_functions_runtimes
+gcp_cloud_run_services
+gcp_compute_engine_forwardingrules
+gcp_compute_engine_instances
+gcp_exporter_build_info
+gcp_exporter_start_time
+gcp_kubernetes_engine_cluster_nodes
+gcp_kubernetes_engine_cluster_up
+gcp_projects_count
+gcp_storage_buckets
+```
+
 ## Port
 
 Registered `9402` with Prometheus Exporters' [default port allocations](https://github.com/prometheus/prometheus/wiki/Default-port-allocations#exporters-starting-at-9100)
