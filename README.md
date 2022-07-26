@@ -181,7 +181,7 @@ podman run \
 --name=prometheus \
 --volume=${PWD}/prometheus.yml:/etc/prometheus/prometheus.yml \
 --volume=${PWD}/rules.yml:/etc/alertmanager/rules.yml \
-docker.io/prom/prometheus:v2.26.0 \
+docker.io/prom/prometheus:v2.37.0 \
   --config.file=/etc/prometheus/prometheus.yml \
   --web.enable-lifecycle
 
@@ -190,7 +190,7 @@ podman run \
 --pod=${POD} \
 --name=alertmanager \
 --volume=${PWD}/alertmanager.yml:/etc/alertmanager/alertmanager/rules.yml \
-docker.io/prom/alertmanager:v0.21.0
+docker.io/prom/alertmanager:v0.24.0
 
 podman run \
 --detach --tty --rm \
