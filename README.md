@@ -197,7 +197,7 @@ podman run \
 --pod=${POD} \
 --name=gcp-exporter \
 --env=GOOGLE_APPLICATION_CREDENTIALS=/secrets/key.json \
---volume=/home/pi/.config/gcloud/application_default_credentials.json:/secrets/key.json \
+--volume=/home/userid/.config/gcloud/application_default_credentials.json:/secrets/key.json \
 ghcr.io/dazwilkin/gcp-exporter:b1b2ad33c9fe3d3ebcbc30499bc83542956fe5ac
 
 podman run \
