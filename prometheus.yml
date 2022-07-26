@@ -28,6 +28,7 @@ scrape_configs:
   # GCP Exporter
   - job_name: "gcp-exporter"
     scrape_interval: 15m # Reduced frequency for GCP
+    scrape_timeout: 1m
     static_configs:
       - targets:
           - "gcp-exporter:9402"
