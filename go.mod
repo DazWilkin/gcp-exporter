@@ -4,7 +4,7 @@ go 1.18
 
 require (
 	github.com/prometheus/client_golang v1.13.0
-	google.golang.org/api v0.95.0
+	google.golang.org/api v0.98.0
 )
 
 require (
@@ -21,7 +21,7 @@ require (
 	github.com/prometheus/common v0.37.0 // indirect
 	github.com/prometheus/procfs v0.8.0 // indirect
 	go.opencensus.io v0.23.0 // indirect
-	golang.org/x/net v0.0.0-20220907135653-1e95f45603a7 // indirect
+	golang.org/x/net v0.0.0-20220909164309-bea034e7d591 // indirect
 	golang.org/x/oauth2 v0.0.0-20220822191816-0ebed06d0094 // indirect
 	golang.org/x/sys v0.0.0-20220908150016-7ac13a9a928d // indirect
 	golang.org/x/text v0.3.7 // indirect
