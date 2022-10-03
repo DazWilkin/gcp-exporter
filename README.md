@@ -52,7 +52,7 @@ docker run \
 --publish=${PORT}:${PORT} \
 --volume=${CREDENTIALS}:/secrets/client_secrets.json \
 --env=GOOGLE_APPLICATION_CREDENTIALS=/secrets/client_secrets.json \
-ghcr.io/dazwilkin/gcp-exporter:3eb61f660776a9effa1abe9a98269b8b34be0b6d
+ghcr.io/dazwilkin/gcp-exporter:3390e926e54ab693a24d24c030c30a9e4a0cc1d2
 ```
 
 ### [Sigstore](https://www.sigstore.dev/)
@@ -62,7 +62,7 @@ ghcr.io/dazwilkin/gcp-exporter:3eb61f660776a9effa1abe9a98269b8b34be0b6d
 ```bash
 cosign verify \
 --key=./cosign.pub \
-ghcr.io/dazwilkin/gcp-exporter:3eb61f660776a9effa1abe9a98269b8b34be0b6d
+ghcr.io/dazwilkin/gcp-exporter:3390e926e54ab693a24d24c030c30a9e4a0cc1d2
 ```
 
 > **NOTE** `cosign.pub` may be downloaded [here](./cosign.pub)
@@ -83,7 +83,7 @@ docker-compose up
 
 ```YAML
 gcp-exporter:
-  image: ghcr.io/dazwilkin/gcp-exporter:3eb61f660776a9effa1abe9a98269b8b34be0b6d
+  image: ghcr.io/dazwilkin/gcp-exporter:3390e926e54ab693a24d24c030c30a9e4a0cc1d2
   container_name: gcp-exporter
   environment:
   - GOOGLE_APPLICATION_CREDENTIALS=/secrets/client_secrets.json
@@ -208,7 +208,7 @@ podman run \
 --name=gcp-exporter \
 --env=GOOGLE_APPLICATION_CREDENTIALS=/secrets/key.json \
 --volume=/home/userid/.config/gcloud/application_default_credentials.json:/secrets/key.json \
-ghcr.io/dazwilkin/gcp-exporter:3eb61f660776a9effa1abe9a98269b8b34be0b6d
+ghcr.io/dazwilkin/gcp-exporter:3390e926e54ab693a24d24c030c30a9e4a0cc1d2
 
 podman run \
 --detach --tty --rm \
