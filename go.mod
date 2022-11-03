@@ -3,7 +3,7 @@ module github.com/DazWilkin/gcp-exporter
 go 1.18
 
 require (
-	github.com/prometheus/client_golang v1.13.0
+	github.com/prometheus/client_golang v1.13.1
 	google.golang.org/api v0.98.0
 )
 
