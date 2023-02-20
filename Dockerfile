@@ -20,7 +20,7 @@ RUN env ${GOLANG_OPTIONS} \
     -o /go/bin/gcp-exporter \
     ./main.go
 
-FROM gcr.io/distroless/base-debian11
+FROM gcr.io/distroless/static
 
 LABEL org.opencontainers.image.source https://github.com/DazWilkin/gcp-exporter
 
