@@ -3,12 +3,12 @@ groups:
     rules:
       - alert: gcp_artifact_registry_repositories
         # `15m` matches the prometheus.yml scrape_interval
-        expr: min_over_time(gcp_artifact_registry_repositories{}[15m]) > 0
+        expr: min_over_time(gcp_artifact_registry_registries{}[15m]) > 0
         for: 6h
         labels:
           severity: page
         annotations:
-          summary: GCP Artifact Registry repositories exist
+          summary: "GCP Artifact Registry repositories ({{ $value }}) exist (project: {{ $labels.project }})"
       - alert: gcp_cloud_endpoints_services
         # `15m` matches the prometheus.yml scrape_interval
         expr: min_over_time(gcp_cloud_endpoints_services{}[15m]) > 0
@@ -16,7 +16,7 @@ groups:
         labels:
           severity: page
         annotations:
-          summary: GCP Cloud Endpoints services deployed
+          summary: "GCP Cloud Endpoints services ({{ $value }}) deployed (project: {{ $labels.project }})"
       - alert: gcp_cloud_functions_running
         # `15m` matches the prometheus.yml scrape_interval
         expr: min_over_time(gcp_cloud_functions_functions{}[15m]) > 0
@@ -24,7 +24,7 @@ groups:
         labels:
           severity: page
         annotations:
-          summary: GCP Cloud Functions running
+          summary: "GCP Cloud Functions ({{ $value }}) running (project: {{ $labels.project }})"
       - alert: gcp_cloud_run_services_running
         # `15m` matches the prometheus.yml scrape_interval
         expr: min_over_time(gcp_cloud_run_services{}[15m]) > 0
@@ -32,21 +32,21 @@ groups:
         labels:
           severity: page
         annotations:
-          summary: GCP Cloud Run services running
+          summary: "GCP Cloud Run services ({{ $value }}) running (project: {{ $labels.project }})"
       - alert: gcp_compute_engine_instances_running
-        expr: gcp_compute_engine_instances{} > 0
+        expr: min_over_time(gcp_compute_engine_instances{}[15m]) > 0
         for: 6h
         labels:
           severity: page
         annotations:
-          summary: GCP Compute Engine Instances running
+          summary: "GCP Compute Engine Instances ({{ $value }}) running (project: {{ $labels.project }})"
       - alert: gcp_forwarding_rules_running
-        expr: gcp_compute_engine_forwardingrules{} > 0
+        expr: min_over_time(gcp_compute_engine_forwardingrules{}[15m]) > 0
         for: 6h
         labels:
           severity: page
         annotations:
-          summary: GCP Compute Engine ForwardingRules running
+          summary: "GCP Compute Engine ForwardingRules ({{ $value }}) running (project: {{ $labels.project }})"
       - alert: gcp_kubernetes_clusters_running
         # `15m` matches the prometheus.yml scrape_interval
         expr: min_over_time(gcp_kubernetes_engine_cluster_up{}[15m]) > 0
@@ -54,29 +54,29 @@ groups:
         labels:
           severity: page
         annotations:
-          summary: GCP Kubernetes Engine clusters running
-      # - alert: gcp_storage_buckets
-      #   expr: gcp_storage_buckets{} > 0
-      #   for: 6h
-      #   labels:
-      #     severity: warning
-      #   annotations:
-      #     summary: GCP Storage buckets exist
+          summary: "GCP Kubernetes Engine clusters ({{ $value }}) running (project: {{ $labels.project }})"
+      - alert: gcp_storage_buckets
+        expr: gcp_storage_buckets{} > 0
+        for: 6h
+        labels:
+          severity: warning
+        annotations:
+          summary: "GCP Storage buckets ({{ $value }}) exist (project: {{ $labels.project }})"
   - name: gcp_status
     rules:
       - alert: gcp_status_services
         # `15m` matches the prometheus.yml scrape_interval
-        expr: gcp_status_services{} != 41
+        expr: gcp_status_services{} != 100
         for: 15m
         labels:
-          severity: page
+          severity: warning
         annotations:
-          summary: GCP Status Services availability discrepancy
+          summary: GCP Status Services ({{ $labels.region }}) availability discrepancy ({{ $value }}!=100)
       - alert: gcp_status_up
         # `15m` matches the prometheus.yml scrape_interval
-        expr: min_over_time(gcp_status_up{}[15m]) != 1.0
+        expr: min_over_time(gcp_status_up{region="Americas"}[15m]) != 1.0
         for: 15m
         labels:
-          severity: page
+          severity: warning
         annotations:
           summary: GCP Status Service {{ $labels.service }} down
