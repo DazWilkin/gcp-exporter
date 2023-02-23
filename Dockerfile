@@ -19,7 +19,7 @@ RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 \
     -o /go/bin/gcp-exporter \
     ./main.go
 
-FROM gcr.io/distroless/static-debian11:nonroot
+FROM gcr.io/distroless/static-debian11:latest
 
 LABEL org.opencontainers.image.source https://github.com/DazWilkin/gcp-exporter
 
