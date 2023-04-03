@@ -66,11 +66,12 @@ func main() {
 	registry.MustRegister(collector.NewProjectsCollector(account, *filter, *pagesize))
 
 	registry.MustRegister(collector.NewArtifactRegistryCollector(account))
-	registry.MustRegister(collector.NewComputeCollector(account))
 	registry.MustRegister(collector.NewCloudRunCollector(account))
+	registry.MustRegister(collector.NewComputeCollector(account))
 	registry.MustRegister(collector.NewEndpointsCollector(account))
 	registry.MustRegister(collector.NewFunctionsCollector(account))
 	registry.MustRegister(collector.NewKubernetesCollector(account))
+	registry.MustRegister(collector.NewSchedulerCollector(account))
 	registry.MustRegister(collector.NewStorageCollector(account))
 
 	mux := http.NewServeMux()

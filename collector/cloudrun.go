@@ -23,6 +23,7 @@ var (
 type CloudRunCollector struct {
 	account *gcp.Account
 
+	Jobs     *prometheus.Desc
 	Services *prometheus.Desc
 }
 
@@ -32,9 +33,18 @@ func NewCloudRunCollector(account *gcp.Account) *CloudRunCollector {
 	return &CloudRunCollector{
 		account: account,
 
+		Jobs: prometheus.NewDesc(
+			fqName("jobs"),
+			"Number of Jobs",
+			[]string{
+				"project",
+				// "region",
+			},
+			nil,
+		),
 		Services: prometheus.NewDesc(
 			fqName("services"),
-			"Number of services",
+			"Number of Services",
 			[]string{
 				"project",
 				// "region",
@@ -61,52 +71,104 @@ func (c *CloudRunCollector) Collect(ch chan<- prometheus.Metric) {
 			defer wg.Done()
 			log.Printf("[CloudRunCollector] Project: %s", p.ProjectId)
 
-			// ListServicesResponse may (!) contain Metadata
-			// If Metadata is presnet, it may (!) contain Continue iff there's more data
-			// https://pkg.go.dev/google.golang.org/api@v0.43.0/run/v1#ListServicesResponse
-			// https://pkg.go.dev/google.golang.org/api@v0.43.0/run/v1#ListMeta
+			var wgSJ sync.WaitGroup
+			wgSJ.Add(1)
+			go func(p *cloudresourcemanager.Project) {
+				defer wgSJ.Done()
 
-			rqst := cloudrunService.Namespaces.Services.List(Parent(p.ProjectId))
+				// ListServicesResponse may (!) contain Metadata
+				// If Metadata is presnet, it may (!) contain Continue iff there's more data
+				// https://pkg.go.dev/google.golang.org/api@v0.43.0/run/v1#ListServicesResponse
+				// https://pkg.go.dev/google.golang.org/api@v0.43.0/run/v1#ListMeta
 
-			// Do request at least once
-			cont := ""
-			count := 0
-			for {
-				rqst.Continue(cont)
-				resp, err := rqst.Do()
-				if err != nil {
-					if e, ok := err.(*googleapi.Error); ok {
-						if e.Code == http.StatusForbidden {
-							// Probably (!) Cloud Run Admin API has not been used in this project
-							return
+				rqst := cloudrunService.Namespaces.Services.List(Parent(p.ProjectId))
+
+				// Do request at least once
+				cont := ""
+				count := 0
+				for {
+					rqst.Continue(cont)
+					resp, err := rqst.Do()
+					if err != nil {
+						if e, ok := err.(*googleapi.Error); ok {
+							if e.Code == http.StatusForbidden {
+								// Probably (!) Cloud Run Admin API has not been used in this project
+								return
+							}
 						}
+						log.Println(err)
+						return
 					}
-					log.Println(err)
-					return
+
+					pageSize := len(resp.Items)
+					count += pageSize
+
+					if resp.Metadata != nil {
+						// If there's Metadata, update cont
+						cont = resp.Metadata.Continue
+					} else {
+						// Otherwise, we're done
+						break
+					}
 				}
 
-				pageSize := len(resp.Items)
-				count += pageSize
-
-				if resp.Metadata != nil {
-					// If there's Metadata, update continue_
-					cont = resp.Metadata.Continue
-				} else {
-					// Otherwise, we're done
-					break
+				if count != 0 {
+					ch <- prometheus.MustNewConstMetric(
+						c.Services,
+						prometheus.GaugeValue,
+						float64(count),
+						[]string{
+							p.ProjectId,
+						}...,
+					)
 				}
-			}
+			}(p)
+			wgSJ.Add(1)
+			go func(p *cloudresourcemanager.Project) {
+				defer wgSJ.Done()
 
-			if count != 0 {
-				ch <- prometheus.MustNewConstMetric(
-					c.Services,
-					prometheus.GaugeValue,
-					float64(count),
-					[]string{
-						p.ProjectId,
-					}...,
-				)
-			}
+				rqst := cloudrunService.Namespaces.Jobs.List(Parent(p.ProjectId))
+
+				// Do request at least once
+				cont := ""
+				count := 0
+				for {
+					rqst.Continue(cont)
+					resp, err := rqst.Do()
+					if err != nil {
+						if e, ok := err.(*googleapi.Error); ok {
+							if e.Code == http.StatusForbidden {
+								// Probably (!) Cloud Run Admin API has not been used in this project
+								return
+							}
+						}
+						log.Println(err)
+						return
+					}
+
+					pageSize := len(resp.Items)
+					count += pageSize
+
+					if resp.Metadata != nil {
+						// If there's Metadata, update cont
+						cont = resp.Metadata.Continue
+					} else {
+						// We're done
+						break
+					}
+				}
+				if count != 0 {
+					ch <- prometheus.MustNewConstMetric(
+						c.Jobs,
+						prometheus.GaugeValue,
+						float64(count),
+						[]string{
+							p.ProjectId,
+						}...,
+					)
+				}
+			}(p)
+			wgSJ.Wait()
 		}(p)
 	}
 	wg.Wait()
