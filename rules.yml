@@ -25,6 +25,14 @@ groups:
           severity: page
         annotations:
           summary: "GCP Cloud Functions ({{ $value }}) running (project: {{ $labels.project }})"
+      - alert: gcp_cloud_run_jobs_running
+        # `15m` matches the prometheus.yml scrape_interval
+        expr: min_over_time(gcp_cloud_run_jobs{}[15m]) > 0
+        for: 6h
+        labels:
+          severity: page
+        annotations:
+          summary: "GCP Cloud Run jobs ({{ $value }}) running (project: {{ $labels.project }})"
       - alert: gcp_cloud_run_services_running
         # `15m` matches the prometheus.yml scrape_interval
         expr: min_over_time(gcp_cloud_run_services{}[15m]) > 0
@@ -55,8 +63,16 @@ groups:
           severity: page
         annotations:
           summary: "GCP Kubernetes Engine clusters ({{ $value }}) running (project: {{ $labels.project }})"
+      - alert: gcp_cloud_scheduler_jobs_running
+        # `15m` matches the prometheus.yml scrape_interval
+        expr: min_over_time(gcp_cloud_scheduler_jobs{}[15m]]) > 0
+        for: 6h
+        labels:
+          severity: page
+        annotations:
+          summary: "GCP Cloud Scheduler jobs ({{ $value }}) running (project: {{ $labels.project }})"
       - alert: gcp_storage_buckets
-        expr: gcp_storage_buckets{} > 0
+        expr: min_over_time(gcp_storage_buckets{}[15m]) > 0
         for: 6h
         labels:
           severity: warning
@@ -80,3 +96,72 @@ groups:
           severity: warning
         annotations:
           summary: GCP Status Service {{ $labels.service }} down
+  - name: fly_exporter
+    rules:
+      - alert: fly_exporter_apps_running
+        expr: min_over_time(fly_exporter_apps{}[15m]) > 0
+        for: 6h
+        labels:
+          severity: page
+        annotations:
+          summary: fly.io {{ $value }} apps deployed
+  - name: linode_exporter
+    rules:
+      - alert: linode_instance_up
+        expr: min_over_time(linode_instance_up{}[15m])>0
+        for: 3h
+        labels:
+          severity: page
+        annotations:
+          summary: Linode {{ $value }} Instances exist
+      - alert: linode_kubernetes_up
+        expr: min_over_time(linode_kubernetes_up{}[15m])>0
+        for: 3h
+        labels:
+          severity: page
+        annotations:
+          summary: Linode {{ $value }} Kubernetes clusters exist
+      - alert: linode_nodebalancer_up
+        expr: min_over_time(linode_nodebalancer_up{}[15m])>0
+        for: 3h
+        labels:
+          severity: page
+        annotations:
+          summary: Linode {{ $value }} NodeBalancers exist
+      - alert: linode_volume_up
+        expr: min_over_time(linode_volume_up{}[15m])>0
+        for: 3h
+        labels:
+          severity: page
+        annotations:
+          summary: Linode {{ $value }} Volumes exist
+  - name: vultr_exporter
+    rules:
+      - alert: vultr_block_storage_up
+        expr: min_over_time(vultr_block_storage_up{}[15m]) > 0
+        for: 3h
+        labels:
+          severity: page
+        annotations:
+          summary: Vultr {{ $value }} Block Storage volumes exist
+      - alert: vultr_kubernetes_cluster_up
+        expr: min_over_time(vultr_kubernetes_cluster_up{}[15m]) > 0
+        for: 3h
+        labels:
+          severity: page
+        annotations:
+          summary: Vultr {{ $value }} Kubernetes Engine cluster running
+      - alert: vultr_load_balancer_up
+        expr: min_over_time(vultr_load_balancer_up{}[15m]) > 0
+        for: 3h
+        labels:
+          severity: page
+        annotations:
+          summary: Vultr {{ $value }} Load Balancers running
+      - alert: vultr_reserved_ips_up
+        expr: min_over_time(vultr_reserved_ips_up{}[15m]) > 0
+        for: 3h
+        labels:
+          severity: page
+        annotations:
+          summary: Vultr {{ $value }} Reserved IPs exist
