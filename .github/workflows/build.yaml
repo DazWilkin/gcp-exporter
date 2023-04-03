@@ -5,14 +5,15 @@ on:
     branches:
       - master
 
+env:
+  REPO: dazwilkin/gcp-exporter
+
 jobs:
   gcp-exporter:
     name: gcp-exporter
     runs-on: ubuntu-latest
-    env:
-      REPO: dazwilkin/gcp-exporter
     outputs:
-      digest: ${{ steps.foo.outputs.digest }}
+      digest: ${{ steps.build-push.outputs.digest }}
     steps:
       - name: checkout
         uses: actions/checkout@v3
@@ -27,7 +28,7 @@ jobs:
       - name: Get kernel version
         run: echo "VERSION=$(uname --kernel-release)" >> ${GITHUB_ENV}
       - name: build-push
-        id: foo
+        id: build-push
         uses: docker/build-push-action@v4
         with:
           context: .
@@ -56,6 +57,10 @@ jobs:
           ghcr.io/${{ env.REPO }}@${{ needs.gcp-exporter.outputs.digest }}
         env:
           COSIGN_PASSWORD: ""
+  documentation:
+    runs-on: ubuntu-latest
+    needs: gcp-exporter
+    steps:
       - name: revise occurrences of the image
         run: |
           git config --local user.email "action@github.com"
