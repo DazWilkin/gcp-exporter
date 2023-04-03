@@ -72,6 +72,7 @@ jobs:
           --annotations="workflow=${{ github.workflow }}" \
           --annotations="commit=${{ github.sha }}" \
           --annotations="version=${{ env.VERSION }}" \
+          --yes \
           ghcr.io/${{ env.REPO }}@${{ needs.gcp-exporter.outputs.digest }}
         env:
           COSIGN_PASSWORD: ""
