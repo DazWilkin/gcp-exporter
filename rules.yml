@@ -42,14 +42,14 @@ groups:
         annotations:
           summary: "GCP Cloud Run services ({{ $value }}) running (project: {{ $labels.project }})"
       - alert: gcp_cloud_monitoring_alert_policies_running
-        expr: min_over_time(gcp_cloud_monitoring_alert_policies{}[15]) > 0
+        expr: min_over_time(gcp_cloud_monitoring_alert_policies{}[15m]) > 0
         for: 6h
         labels:
           severity: page
         annotations:
           summary: "GCP Cloud Monitoring Alert Policies ({{ $value }}) running (project: {{ $labels.project }})"
       - alert: gcp_cloud_monitoring_uptime_checks_running
-        expr: min_over_time(gcp_cloud_monitoring_uptime_checks{}[15]) > 0
+        expr: min_over_time(gcp_cloud_monitoring_uptime_checks{}[15m]) > 0
         for: 6h
         labels:
           severity: page
