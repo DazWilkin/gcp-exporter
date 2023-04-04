@@ -240,7 +240,11 @@ Please file issues
 | `gcp_cloud_functions_functions`            | Gauge   | Number of Cloud Functions functions
 | `gcp_cloud_functions_locations`            | Gauge   | Number of Cloud Functions locations
 | `gcp_cloud_functions_runtimes`             | Gauge   | Number of Cloud Functions runtimes
+| `gcp_cloud_monitoring_alert_policies`      | Gauge   | Number of Cloud Monitoring Alert Policies
+| `gcp_cloud_monitoring_uptime_checks`       | Gauge   | Number of Cloud Monitoring Uptime Checks
+| `gcp_cloud_run_jobs`                       | Gauge   | Number of Cloud Run jobs
 | `gcp_cloud_run_services`                   | Gauge   | Number of Cloud Run services
+| `gcp_cloud_scheduler_jobs`                 | Gauge   | Number of Cloud Scheduler jobs
 | `gcp_compute_engine_instances`             | Gauge   | Number of instances
 | `gcp_compute_engine_forwardingrules`       | Gauge   | Number of forwardingrules
 | `gcp_kubernetes_engine_cluster_up`         | Gauge   | 1 if the cluster is running, 0 otherwise
