@@ -5,21 +5,18 @@ on:
     branches:
       - master
 
-env:
-  REPO: dazwilkin/gcp-exporter
-
 jobs:
   gcp-exporter:
     name: gcp-exporter
     runs-on: ubuntu-latest
-    # outputs:
-    #   digest: ${{ steps.build-push.outputs.digest }}
+    env:
+      REPO: dazwilkin/gcp-exporter
     steps:
-      - name: checkout
+      - name: Checkout
         uses: actions/checkout@v3
-      - name: setup
+      - name: Setup
         uses: docker/setup-buildx-action@v2
-      - name: login
+      - name: Login
         uses: docker/login-action@v2
         with:
           registry: ghcr.io
@@ -27,8 +24,11 @@ jobs:
           password: ${{ secrets.GHCR }}
       - name: Get kernel version
         run: echo "VERSION=$(uname --kernel-release)" >> ${GITHUB_ENV}
-      - name: build-push
-        id: build-push
+      - name: docker build && docker push
+        # id used here in order to provide the output (digest) from this step to cosign sign
+        # docker/build-push-action outputs are defined here:
+        # https://github.com/docker/build-push-action#outputs
+        id: docker-build-push
         uses: docker/build-push-action@v4
         with:
           context: .
@@ -45,13 +45,13 @@ jobs:
       - name: Sign container image
         run: |
           cosign sign \
+          --yes \
           --key=./cosign.key \
           --annotations="repo=${{ github.repository }}" \
           --annotations="workflow=${{ github.workflow }}" \
           --annotations="commit=${{ github.sha }}" \
           --annotations="version=${{ env.VERSION }}" \
-          --yes \
-          ghcr.io/${{ env.REPO }}@${{ steps.build-push.outputs.digest }}
+          ghcr.io/${{ env.REPO }}@${{ steps.docker-build-push.outputs.digest }}
         env:
           COSIGN_PASSWORD: ""
       - name: revise occurrences of the image
@@ -70,7 +70,3 @@ jobs:
 
           git commit --message "GitHub Actions update image references"
           git push origin master
-  # cosign:
-  #   runs-on: ubuntu-latest
-  #   needs: gcp-exporter
-  #   steps:
