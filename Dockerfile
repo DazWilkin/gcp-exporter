@@ -21,6 +21,7 @@ RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 \
 
 FROM gcr.io/distroless/static-debian11:latest
 
+LABEL org.opencontainers.image.description "Prometheus Exporter for GCP"
 LABEL org.opencontainers.image.source https://github.com/DazWilkin/gcp-exporter
 
 COPY --from=build /go/bin/gcp-exporter /
