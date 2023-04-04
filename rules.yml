@@ -41,6 +41,28 @@ groups:
           severity: page
         annotations:
           summary: "GCP Cloud Run services ({{ $value }}) running (project: {{ $labels.project }})"
+      - alert: gcp_cloud_monitoring_alert_policies_running
+        expr: min_over_time(gcp_cloud_monitoring_alert_policies{}[15]) > 0
+        for: 6h
+        labels:
+          severity: page
+        annotations:
+          summary: "GCP Cloud Monitoring Alert Policies ({{ $value }}) running (project: {{ $labels.project }})"
+      - alert: gcp_cloud_monitoring_uptime_checks_running
+        expr: min_over_time(gcp_cloud_monitoring_uptime_checks{}[15]) > 0
+        for: 6h
+        labels:
+          severity: page
+        annotations:
+          summary: "GCP Cloud Monitoring Uptime Checks ({{ $value }}) running (project: {{ $labels.project }})"
+      - alert: gcp_cloud_scheduler_jobs_running
+        # `15m` matches the prometheus.yml scrape_interval
+        expr: min_over_time(gcp_cloud_scheduler_jobs{}[15m]) > 0
+        for: 6h
+        labels:
+          severity: page
+        annotations:
+          summary: "GCP Cloud Scheduler jobs ({{ $value }}) running (project: {{ $labels.project }})"
       - alert: gcp_compute_engine_instances_running
         expr: min_over_time(gcp_compute_engine_instances{}[15m]) > 0
         for: 6h
@@ -48,7 +70,7 @@ groups:
           severity: page
         annotations:
           summary: "GCP Compute Engine Instances ({{ $value }}) running (project: {{ $labels.project }})"
-      - alert: gcp_forwarding_rules_running
+      - alert: gcp_compute_engine_forwarding_rules_running
         expr: min_over_time(gcp_compute_engine_forwardingrules{}[15m]) > 0
         for: 6h
         labels:
@@ -63,14 +85,6 @@ groups:
           severity: page
         annotations:
           summary: "GCP Kubernetes Engine clusters ({{ $value }}) running (project: {{ $labels.project }})"
-      - alert: gcp_cloud_scheduler_jobs_running
-        # `15m` matches the prometheus.yml scrape_interval
-        expr: min_over_time(gcp_cloud_scheduler_jobs{}[15m]]) > 0
-        for: 6h
-        labels:
-          severity: page
-        annotations:
-          summary: "GCP Cloud Scheduler jobs ({{ $value }}) running (project: {{ $labels.project }})"
       - alert: gcp_storage_buckets
         expr: min_over_time(gcp_storage_buckets{}[15m]) > 0
         for: 6h
