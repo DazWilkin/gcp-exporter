@@ -66,9 +66,9 @@ func (c *SchedulerCollector) Collect(ch chan<- prometheus.Metric) {
 			defer wg.Done()
 			log.Printf("[SchedulerCollector] Project: %s", p.ProjectId)
 
+			name := fmt.Sprintf("projects/%s", p.ProjectId)
 			count := 0
 
-			name := fmt.Sprintf("projects/%s", p.ProjectId)
 			rqst := schedulerService.Projects.Locations.List(name)
 			if err := rqst.Pages(ctx, func(page *cloudscheduler.ListLocationsResponse) error {
 				for _, l := range page.Locations {
