@@ -64,6 +64,12 @@ jobs:
         run: echo "${{ secrets.SIGNING }}" > ./cosign.key
       - name: Get kernel version
         run: echo "VERSION=$(uname --kernel-release)" >> ${GITHUB_ENV}
+      - name: login
+        uses: docker/login-action@v2
+        with:
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GHCR }}
       - name: Sign container image
         run: |
           cosign sign \
