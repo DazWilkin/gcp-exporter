@@ -240,6 +240,7 @@ Please file issues
 | `gcp_cloud_functions_functions`            | Gauge   | Number of Cloud Functions functions
 | `gcp_cloud_functions_locations`            | Gauge   | Number of Cloud Functions locations
 | `gcp_cloud_functions_runtimes`             | Gauge   | Number of Cloud Functions runtimes
+| `gcp_cloud_logging_logs`                   | Gauge   | Number of Cloud Logging Logs
 | `gcp_cloud_monitoring_alert_policies`      | Gauge   | Number of Cloud Monitoring Alert Policies
 | `gcp_cloud_monitoring_uptime_checks`       | Gauge   | Number of Cloud Monitoring Uptime Checks
 | `gcp_cloud_run_jobs`                       | Gauge   | Number of Cloud Run jobs
@@ -270,6 +271,7 @@ gcp_cloud_endpoints_services
 gcp_cloud_functions_functions
 gcp_cloud_functions_locations
 gcp_cloud_functions_runtimes
+gcp_cloud_logging_logs
 gcp_cloud_run_services
 gcp_compute_engine_forwardingrules
 gcp_compute_engine_instances
