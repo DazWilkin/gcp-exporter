@@ -1,4 +1,13 @@
 groups:
+  - name: ackal
+    rules:
+      - alert: cloud_logging_logs
+        expr: min_over_time(gcp_cloud_logging_logs{project=~"ackal-[0-9]{6}"}[15m]) > 39
+        for: 6h
+        labels:
+          severity: page
+        annotations:
+          summary: "Ackal Project ({{ $labels.project}}) has {{ $value }} logs"
   - name: gcp_exporter
     rules:
       - alert: gcp_artifact_registry_repositories
@@ -179,3 +188,12 @@ groups:
           severity: page
         annotations:
           summary: Vultr {{ $value }} Reserved IPs exist
+  - name: azure_exporter
+    rules:
+      - alert: azure_container_apps_running
+        expr: min_over_time(azure_container_apps_total{}[15m]) > 0
+        for: 6h
+        labels:
+          severity: page
+        annotations:
+          summary: "Azure Container Apps ({{ $value }}) running (resource group: {{ $labels.resourcegroup }})"
