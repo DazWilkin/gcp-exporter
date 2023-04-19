@@ -71,6 +71,7 @@ func main() {
 	registry.MustRegister(collector.NewEndpointsCollector(account))
 	registry.MustRegister(collector.NewFunctionsCollector(account))
 	registry.MustRegister(collector.NewKubernetesCollector(account))
+	registry.MustRegister(collector.NewLoggingCollector(account))
 	registry.MustRegister(collector.NewMonitoringCollector(account))
 	registry.MustRegister(collector.NewSchedulerCollector(account))
 	registry.MustRegister(collector.NewStorageCollector(account))

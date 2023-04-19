@@ -52,7 +52,7 @@ docker run \
 --publish=${PORT}:${PORT} \
 --volume=${CREDENTIALS}:/secrets/client_secrets.json \
 --env=GOOGLE_APPLICATION_CREDENTIALS=/secrets/client_secrets.json \
-ghcr.io/dazwilkin/gcp-exporter:31d080a821aaf07a166477d350450fbaebb6d569
+ghcr.io/dazwilkin/gcp-exporter:07a03bb118618c11fa787c2a5607e000262dbacc
 ```
 
 ### [Sigstore](https://www.sigstore.dev/)
@@ -62,7 +62,7 @@ ghcr.io/dazwilkin/gcp-exporter:31d080a821aaf07a166477d350450fbaebb6d569
 ```bash
 cosign verify \
 --key=./cosign.pub \
-ghcr.io/dazwilkin/gcp-exporter:31d080a821aaf07a166477d350450fbaebb6d569
+ghcr.io/dazwilkin/gcp-exporter:07a03bb118618c11fa787c2a5607e000262dbacc
 ```
 
 > **NOTE** `cosign.pub` may be downloaded [here](./cosign.pub)
@@ -83,7 +83,7 @@ docker-compose up
 
 ```YAML
 gcp-exporter:
-  image: ghcr.io/dazwilkin/gcp-exporter:31d080a821aaf07a166477d350450fbaebb6d569
+  image: ghcr.io/dazwilkin/gcp-exporter:07a03bb118618c11fa787c2a5607e000262dbacc
   container_name: gcp-exporter
   environment:
   - GOOGLE_APPLICATION_CREDENTIALS=/secrets/client_secrets.json
@@ -208,7 +208,7 @@ podman run \
 --name=gcp-exporter \
 --env=GOOGLE_APPLICATION_CREDENTIALS=/secrets/key.json \
 --volume=/home/userid/.config/gcloud/application_default_credentials.json:/secrets/key.json \
-ghcr.io/dazwilkin/gcp-exporter:31d080a821aaf07a166477d350450fbaebb6d569
+ghcr.io/dazwilkin/gcp-exporter:07a03bb118618c11fa787c2a5607e000262dbacc
 
 podman run \
 --detach --tty --rm \
@@ -240,6 +240,7 @@ Please file issues
 | `gcp_cloud_functions_functions`            | Gauge   | Number of Cloud Functions functions
 | `gcp_cloud_functions_locations`            | Gauge   | Number of Cloud Functions locations
 | `gcp_cloud_functions_runtimes`             | Gauge   | Number of Cloud Functions runtimes
+| `gcp_cloud_logging_logs`                   | Gauge   | Number of Cloud Logging Logs
 | `gcp_cloud_monitoring_alert_policies`      | Gauge   | Number of Cloud Monitoring Alert Policies
 | `gcp_cloud_monitoring_uptime_checks`       | Gauge   | Number of Cloud Monitoring Uptime Checks
 | `gcp_cloud_run_jobs`                       | Gauge   | Number of Cloud Run jobs
@@ -270,6 +271,7 @@ gcp_cloud_endpoints_services
 gcp_cloud_functions_functions
 gcp_cloud_functions_locations
 gcp_cloud_functions_runtimes
+gcp_cloud_logging_logs
 gcp_cloud_run_services
 gcp_compute_engine_forwardingrules
 gcp_compute_engine_instances
