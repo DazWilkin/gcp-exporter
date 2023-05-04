@@ -1,4 +1,10 @@
-ARG GOLANG_VERSION=1.20
+ARG GOLANG_VERSION=1.20.4
+
+ARG COMMIT
+ARG VERSION
+
+ARG GOOS=linux
+ARG GOARCH=amd64
 
 FROM docker.io/golang:${GOLANG_VERSION} as build
 
@@ -9,10 +15,12 @@ COPY main.go .
 COPY collector ./collector
 COPY gcp ./gcp
 
-ARG VERSION=""
-ARG COMMIT=""
+ARG VERSION
+ARG COMMIT
+ARG GOOS
+ARG GOARCH
 
-RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 \
+RUN CGO_ENABLED=0 GOOS=${GOOS} GOARCH=${GOARCH} \
     go build \
     -ldflags "-X main.OSVersion=${VERSION} -X main.GitCommit=${COMMIT}" \
     -a -installsuffix cgo \
