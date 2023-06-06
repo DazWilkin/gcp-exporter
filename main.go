@@ -69,6 +69,7 @@ func main() {
 	registry.MustRegister(collector.NewCloudRunCollector(account))
 	registry.MustRegister(collector.NewComputeCollector(account))
 	registry.MustRegister(collector.NewEndpointsCollector(account))
+	registry.MustRegister(collector.NewEventarcCollector(account))
 	registry.MustRegister(collector.NewFunctionsCollector(account))
 	registry.MustRegister(collector.NewKubernetesCollector(account))
 	registry.MustRegister(collector.NewLoggingCollector(account))
