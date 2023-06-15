@@ -8,7 +8,6 @@ import (
 
 	"github.com/DazWilkin/gcp-exporter/gcp"
 	"github.com/prometheus/client_golang/prometheus"
-	"golang.org/x/oauth2/google"
 
 	cloudresourcemanager "google.golang.org/api/cloudresourcemanager/v1"
 	cloudscheduler "google.golang.org/api/cloudscheduler/v1"
@@ -46,13 +45,7 @@ func NewSchedulerCollector(account *gcp.Account) *SchedulerCollector {
 // Collect implements Prometheus' Collector interface and is used to collect metrics
 func (c *SchedulerCollector) Collect(ch chan<- prometheus.Metric) {
 	ctx := context.Background()
-	httpClient, err := google.DefaultClient(ctx, cloudscheduler.CloudPlatformScope)
-	if err != nil {
-		log.Println(err)
-		return
-	}
-
-	schedulerService, err := cloudscheduler.New(httpClient)
+	schedulerService, err := cloudscheduler.NewService(ctx)
 	if err != nil {
 		log.Println(err)
 		return
