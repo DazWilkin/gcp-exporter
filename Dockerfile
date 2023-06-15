@@ -1,5 +1,8 @@
 ARG GOLANG_VERSION=1.20
 
+ARG GOOS="linux"
+ARG GOARCH="amd64"
+
 FROM docker.io/golang:${GOLANG_VERSION} as build
 
 WORKDIR /gcp-exporter
@@ -9,10 +12,13 @@ COPY main.go .
 COPY collector ./collector
 COPY gcp ./gcp
 
+ARG GOOS
+ARG GOARCH
+
 ARG VERSION=""
 ARG COMMIT=""
 
-RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 \
+RUN CGO_ENABLED=0 GOOS=${GOOS} GOARCH=${GOARCH} \
     go build \
     -ldflags "-X main.OSVersion=${VERSION} -X main.GitCommit=${COMMIT}" \
     -a -installsuffix cgo \
