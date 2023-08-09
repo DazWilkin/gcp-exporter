@@ -95,7 +95,11 @@ func (c *CloudRunCollector) Collect(ch chan<- prometheus.Metric) {
 							// Probably (!) Cloud Run Admin API has not been used in this project
 							return
 						}
+
+						log.Printf("Google API Error: %d [%s]", e.Code, e.Message)
+						return
 					}
+
 					log.Println(err)
 					return
 				}
@@ -143,7 +147,11 @@ func (c *CloudRunCollector) Collect(ch chan<- prometheus.Metric) {
 							// Probably (!) Cloud Run Admin API has not been used in this project
 							return
 						}
+
+						log.Printf("Google API Error: %d [%s]", e.Code, e.Message)
+						return
 					}
+
 					log.Println(err)
 					return
 				}

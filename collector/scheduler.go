@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"net/http"
 	"sync"
 
 	"github.com/DazWilkin/gcp-exporter/gcp"
@@ -11,6 +12,7 @@ import (
 
 	cloudresourcemanager "google.golang.org/api/cloudresourcemanager/v1"
 	cloudscheduler "google.golang.org/api/cloudscheduler/v1"
+	"google.golang.org/api/googleapi"
 )
 
 var (
@@ -77,12 +79,27 @@ func (c *SchedulerCollector) Collect(ch chan<- prometheus.Metric) {
 						// }
 						return nil
 					}); err != nil {
+						if e, ok := err.(*googleapi.Error); ok {
+							log.Printf("Google API Error: %d [%s]", e.Code, e.Message)
+							return nil
+						}
+
 						log.Println(err)
 						return nil
 					}
 				}
 				return nil
 			}); err != nil {
+				if e, ok := err.(*googleapi.Error); ok {
+					if e.Code == http.StatusForbidden {
+						// Probably (!) Cloud Scheduler API has not been enabled for Project (p)
+						return
+					}
+
+					log.Printf("Googe API Error: %d (%s)", e.Code, e.Message)
+					return
+				}
+
 				log.Println(err)
 				return
 			}

@@ -96,8 +96,11 @@ func (c *FunctionsCollector) Collect(ch chan<- prometheus.Metric) {
 							// Probably (!) Cloud Functions API has not been enabled for Project (p)
 							return
 						}
+
 						log.Printf("Google API Error: %d [%s]", e.Code, e.Message)
+						return
 					}
+
 					log.Println(err)
 					return
 				}

@@ -75,8 +75,11 @@ func (c *EndpointsCollector) Collect(ch chan<- prometheus.Metric) {
 							// Probably Service Management API has not been enabled for Project (p)
 							return
 						}
+
 						log.Printf("Google API Error: %d [%s]", e.Code, e.Message)
+						return
 					}
+
 					log.Println(err)
 					return
 				}

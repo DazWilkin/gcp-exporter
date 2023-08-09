@@ -89,7 +89,11 @@ func (c *ArtifactRegistryCollector) Collect(ch chan<- prometheus.Metric) {
 						// Probably (!) Artifact Registry API has not been enabled for Project (p)
 						return
 					}
+
+					log.Printf("Google API Error: %d [%s]", e.Code, e.Message)
+					return
 				}
+
 				log.Println(err)
 				return
 			}

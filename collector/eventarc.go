@@ -9,7 +9,6 @@ import (
 
 	"github.com/DazWilkin/gcp-exporter/gcp"
 	"github.com/prometheus/client_golang/prometheus"
-	"google.golang.org/api/cloudresourcemanager/v1"
 	"google.golang.org/api/eventarc/v1"
 	"google.golang.org/api/googleapi"
 )
@@ -70,7 +69,7 @@ func (c *EventarcCollector) Collect(ch chan<- prometheus.Metric) {
 
 		// Channels
 		wg.Add(1)
-		go func(p *cloudresourcemanager.Project) {
+		go func() {
 			defer wg.Done()
 
 			rqst := eventarcService.Projects.Locations.Channels.List(parent)
@@ -81,7 +80,9 @@ func (c *EventarcCollector) Collect(ch chan<- prometheus.Metric) {
 						// Probably (!) Eventarc API has not enabled in this Project
 						return
 					}
-					log.Printf("Google API Error: %d (%s)", e.Code, e.Message)
+
+					log.Printf("Google API Error: %d [%s]", e.Code, e.Message)
+					return
 				}
 
 				log.Println(err)
@@ -102,11 +103,11 @@ func (c *EventarcCollector) Collect(ch chan<- prometheus.Metric) {
 					}...,
 				)
 			}
-		}(p)
+		}()
 
 		// Triggers
 		wg.Add(1)
-		go func(p *cloudresourcemanager.Project) {
+		go func() {
 			defer wg.Done()
 
 			rqst := eventarcService.Projects.Locations.Triggers.List(parent)
@@ -117,7 +118,9 @@ func (c *EventarcCollector) Collect(ch chan<- prometheus.Metric) {
 						// Probably (!) Eventarc API has not enabled in this Project
 						return
 					}
-					log.Printf("Google API Error: %d (%s)", e.Code, e.Message)
+
+					log.Printf("Google API Error: %d [%s]", e.Code, e.Message)
+					return
 				}
 
 				log.Println(err)
@@ -152,7 +155,7 @@ func (c *EventarcCollector) Collect(ch chan<- prometheus.Metric) {
 					}...,
 				)
 			}
-		}(p)
+		}()
 	}
 	wg.Wait()
 }
