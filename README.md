@@ -1,6 +1,6 @@
 # Prometheus Exporter for [Google Cloud Platform (GCP)](https://cloud.google.com/)
 
-[![GitHub Actions](https://github.com/DazWilkin/gcp-exporter/actions/workflows/build-container.yaml/badge.svg)](https://github.com/DazWilkin/gcp-exporter/actions/workflows/build.yaml)
+[![GitHub Actions](https://github.com/DazWilkin/gcp-exporter/actions/workflows/build.yaml/badge.svg)](https://github.com/DazWilkin/gcp-exporter/actions/workflows/build.yaml)
 [![Go Reference](https://pkg.go.dev/badge/github.com/DazWilkin/gcp-exporter.svg)](https://pkg.go.dev/github.com/DazWilkin/gcp-exporter)
 [![Go Report Card](https://goreportcard.com/badge/github.com/dazwilkin/gcp-exporter)](https://goreportcard.com/report/github.com/dazwilkin/gcp-exporter)
 
