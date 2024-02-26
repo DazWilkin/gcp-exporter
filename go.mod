@@ -6,7 +6,7 @@ toolchain go1.21.0
 
 require (
 	github.com/prometheus/client_golang v1.18.0
-	google.golang.org/api v0.166.0
+	google.golang.org/api v0.167.0
 )
 
 require (
