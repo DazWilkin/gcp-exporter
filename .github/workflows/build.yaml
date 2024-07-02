@@ -27,7 +27,7 @@ jobs:
         # docker/build-push-action outputs are defined here:
         # https://github.com/docker/build-push-action#outputs
         id: docker-build-push
-        uses: docker/build-push-action@v5
+        uses: docker/build-push-action@v6
         with:
           context: .
           file: ./Dockerfile
