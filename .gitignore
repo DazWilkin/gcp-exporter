@@ -2,7 +2,6 @@
 .env.test
 alertmanager.yml
 kubernetes.alerting.yaml
-podman.sh
 
 # Cosign
 cosign.key
