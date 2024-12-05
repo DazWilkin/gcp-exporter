@@ -1,9 +1,16 @@
 version: 2
 updates:
+# Maintain dependencies for GitHub Actions
 - package-ecosystem: "github-actions"
   directory: "/"
   schedule:
     interval: "monthly"
+# Maintain dependencies for Docker
+- package-ecosystem: "docker"
+  directory: "/Dockerfiles/"
+  schedule:
+    interval: "monthly"
+# Maintain dependencies for Golang Modules
 - package-ecosystem: "gomod"
   directory: "/"
   schedule:
