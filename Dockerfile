@@ -6,7 +6,7 @@ ARG TARGETARCH
 ARG COMMIT
 ARG VERSION
 
-FROM docker.io/golang:${GOLANG_VERSION} AS build
+FROM --platform=${TARGETARCH} docker.io/golang:${GOLANG_VERSION} AS build
 
 WORKDIR /gcp-exporter
 
