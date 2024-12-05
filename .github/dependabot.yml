@@ -7,7 +7,7 @@ updates:
     interval: "monthly"
 # Maintain dependencies for Docker
 - package-ecosystem: "docker"
-  directory: "/Dockerfiles/"
+  directory: "/"
   schedule:
     interval: "monthly"
 # Maintain dependencies for Golang Modules
