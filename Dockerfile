@@ -1,4 +1,4 @@
-ARG GOLANG_VERSION=1.23.0
+ARG GOLANG_VERSION=1.23.3
 
 ARG TARGETOS
 ARG TARGETARCH
@@ -28,7 +28,7 @@ RUN CGO_ENABLED=0 GOOS=${TARGETOS} GOARCH=${TARGETARCH} \
     -o /go/bin/gcp-exporter \
     ./main.go
 
-FROM gcr.io/distroless/static-debian12:latest
+FROM --platform=${TARGETARCH} gcr.io/distroless/static-debian12:latest
 
 LABEL org.opencontainers.image.description="Prometheus Exporter for GCP"
 LABEL org.opencontainers.image.source="https://github.com/DazWilkin/gcp-exporter"
