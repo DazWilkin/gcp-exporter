@@ -35,7 +35,6 @@ func NewEndpointsCollector(account *gcp.Account) *EndpointsCollector {
 			fqName("services"),
 			"Number of Cloud Endpoints services",
 			[]string{
-
 				"project",
 			},
 			nil,
