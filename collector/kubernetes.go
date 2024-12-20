@@ -27,6 +27,7 @@ type KubernetesCollector struct {
 func NewKubernetesCollector(account *gcp.Account) *KubernetesCollector {
 	fqName := name("kubernetes_engine")
 	labelKeys := []string{
+		"project",
 		"name",
 		"location",
 		"version",
@@ -93,6 +94,7 @@ func (c *KubernetesCollector) Collect(ch chan<- prometheus.Metric) {
 						return result
 					}(cluster),
 					[]string{
+						p.ProjectId,
 						cluster.Name,
 						cluster.Location,
 						cluster.CurrentNodeVersion,
@@ -103,6 +105,7 @@ func (c *KubernetesCollector) Collect(ch chan<- prometheus.Metric) {
 					prometheus.GaugeValue,
 					float64(cluster.CurrentNodeCount),
 					[]string{
+						p.ProjectId,
 						cluster.Name,
 						cluster.Location,
 						cluster.CurrentNodeVersion,

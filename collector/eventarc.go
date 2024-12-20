@@ -31,6 +31,7 @@ func NewEventarcCollector(account *gcp.Account) *EventarcCollector {
 			fqName("channels"),
 			"1 if the channel exists",
 			[]string{
+				"project",
 				"name",
 				"provider",
 				"pubsubtopic",
@@ -42,6 +43,7 @@ func NewEventarcCollector(account *gcp.Account) *EventarcCollector {
 			fqName("triggers"),
 			"1 if the trigger exists",
 			[]string{
+				"project",
 				"name",
 				"channel",
 				"contenttype",
@@ -96,6 +98,7 @@ func (c *EventarcCollector) Collect(ch chan<- prometheus.Metric) {
 					prometheus.CounterValue,
 					1.0,
 					[]string{
+						p.ProjectId,
 						channel.Name,
 						channel.Provider,
 						channel.PubsubTopic,
@@ -134,6 +137,7 @@ func (c *EventarcCollector) Collect(ch chan<- prometheus.Metric) {
 					prometheus.CounterValue,
 					1.0,
 					[]string{
+						p.ProjectId,
 						trigger.Name,
 						trigger.Channel,
 						trigger.EventDataContentType,
