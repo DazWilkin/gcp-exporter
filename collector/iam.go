@@ -100,7 +100,7 @@ func (c *IAMCollector) Collect(ch chan<- prometheus.Metric) {
 				// Record Service Account metrics
 				ch <- prometheus.MustNewConstMetric(
 					c.ServiceAccounts,
-					prometheus.CounterValue,
+					prometheus.GaugeValue,
 					1.0,
 					[]string{
 						p.ProjectId,
@@ -153,7 +153,7 @@ func (c *IAMCollector) Collect(ch chan<- prometheus.Metric) {
 					// Record Service Account Key metrics
 					ch <- prometheus.MustNewConstMetric(
 						c.ServiceAccountKeys,
-						prometheus.CounterValue,
+						prometheus.GaugeValue,
 						1.0,
 						[]string{
 							p.ProjectId,
