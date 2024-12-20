@@ -229,28 +229,30 @@ Please file issues
 
 ## Metrics
 
-| Name                                       | Type    | Description
-| ----                                       | ------- | -----------
-| `gcp_exporter_buildinfo`                   | Counter | A metric with a constant '1' value labeled by OS version, Go version, and the Git commit of the exporter
-| `gcp_exporter_startime`                    | Gauge   | Exporter start time in Unix epoch seconds
-| `gcp_artifact_registry_registries`         | Gauge   | Number of Artifact Registry registries
-| `gcp_artifact_registry_locations`          | Gauge   | Number of Artifact Registry locations
-| `gcp_artifact_registry_formats`            | Gauge   | Number of Artifact Registry formats
-| `gcp_cloud_endpoints_services`             | Gauge   | Number of Cloud Endpoints services
-| `gcp_cloud_functions_functions`            | Gauge   | Number of Cloud Functions functions
-| `gcp_cloud_functions_locations`            | Gauge   | Number of Cloud Functions locations
-| `gcp_cloud_functions_runtimes`             | Gauge   | Number of Cloud Functions runtimes
-| `gcp_cloud_logging_logs`                   | Gauge   | Number of Cloud Logging Logs
-| `gcp_cloud_monitoring_alert_policies`      | Gauge   | Number of Cloud Monitoring Alert Policies
-| `gcp_cloud_monitoring_uptime_checks`       | Gauge   | Number of Cloud Monitoring Uptime Checks
-| `gcp_cloud_run_jobs`                       | Gauge   | Number of Cloud Run jobs
-| `gcp_cloud_run_services`                   | Gauge   | Number of Cloud Run services
-| `gcp_cloud_scheduler_jobs`                 | Gauge   | Number of Cloud Scheduler jobs
-| `gcp_compute_engine_instances`             | Gauge   | Number of instances
-| `gcp_compute_engine_forwardingrules`       | Gauge   | Number of forwardingrules
-| `gcp_kubernetes_engine_cluster_up`         | Gauge   | 1 if the cluster is running, 0 otherwise
-| `gcp_kubernetes_engine_cluster_nodes`      | Gauge   | Number of nodes currently in the cluster
-| `gcp_storage_buckets`                      | Gauge   | Number of buckets
+|Name|Type|Description|
+|----|----|-----------|
+|`gcp_exporter_buildinfo`|Counter|A metric with a constant '1' value labeled by OS version, Go version, and the Git commit of the exporter|
+|`gcp_exporter_startime`|Gauge|Exporter start time in Unix epoch seconds|
+|`gcp_artifact_registry_registries`|Gauge|Number of Artifact Registry registries|
+|`gcp_artifact_registry_locations`|Gauge|Number of Artifact Registry locations|
+|`gcp_artifact_registry_formats`|Gauge|Number of Artifact Registry formats|
+|`gcp_cloud_endpoints_services`|Gauge|Number of Cloud Endpoints services|
+|`gcp_cloud_functions_functions`|Gauge|Number of Cloud Functions functions|
+|`gcp_cloud_functions_locations`|Gauge|Number of Cloud Functions locations|
+|`gcp_cloud_functions_runtimes`| Gauge| Number of Cloud Functions runtimes|
+|`gcp_cloud_logging_logs`| Gauge| Number of Cloud Logging Logs|
+|`gcp_cloud_monitoring_alert_policies`|Gauge|Number of Cloud Monitoring Alert Policies|
+|`gcp_cloud_monitoring_uptime_checks`|Gauge|Number of Cloud Monitoring Uptime Checks|
+|`gcp_cloud_run_jobs`|Gauge|Number of Cloud Run jobs|
+|`gcp_cloud_run_services`|Gauge|Number of Cloud Run services|
+|`gcp_cloud_scheduler_jobs`|Gauge|Number of Cloud Scheduler jobs|
+|`gcp_compute_engine_instances`|Gauge|Number of instances|
+|`gcp_compute_engine_forwardingrules`|Gauge|Number of forwardingrules|
+|`gcp_iam_service_accounts`|Gauge|Number of Service Accounts|
+|`gcp_iam_service_account_keys`|Gauge|Number of Service Account Keys|
+|`gcp_kubernetes_engine_cluster_up`|Gauge|1 if the cluster is running, 0 otherwise|
+|`gcp_kubernetes_engine_cluster_nodes`|Gauge|Number of nodes currently in the cluster|
+|`gcp_storage_buckets`|Gauge|Number of buckets|
 
 ## Prometheus API
 
@@ -258,7 +260,7 @@ Please file issues
 curl \
 --silent \
 http://localhost:9090/api/v1/label/__name__/values \
-| jq -r .data[] | awk '/^gcp/ {print}'
+| jq -r .data[]| awk '/^gcp/ {print}'
 ```
 
 Yields:
