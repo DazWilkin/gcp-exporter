@@ -25,23 +25,25 @@ var (
 	// StartTime is the start time of the exporter represented as a UNIX epoch
 	StartTime = time.Now().Unix()
 )
+
 var (
-	filter      										  = flag.String("filter", "", "Filter the results of the request")
-	pagesize    										  = flag.Int64("max_projects", 10, "Maximum number of projects to include")
-	endpoint    										  = flag.String("endpoint", ":9402", "The endpoint of the HTTP server")
-	metricsPath 										  = flag.String("path", "/metrics", "The path on which Prometheus metrics will be served")
- DisableArtifactRegistryCollector  = flag.Bool("collector.artifact_registry.disable", false, "Disables the metrics collector for the Artifact Registry")
- DisableCloudRunCollector           = flag.Bool("collector.cloud_run.disable", false, "Disables the metrics collector for the Cloud Run")
- DisableComputeCollector         = flag.Bool("collector.compute.disable", false, "Disables the metrics collector for the Compute")
- DisableEndpointsCollector       = flag.Bool("collector.endpoints.disable", false, "Disables the metrics collector for the Cloud Endpoints Services")
- DisableEventarcCollector          = flag.Bool("collector.eventarc.disable", false, "Disables the metrics collector for the Cloud Eventarc")
- DisableFunctionsCollector       = flag.Bool("collector.functions.disable", false, "Disables the metrics collector for the Cloud Functions")
- DisableIAMCollector             = flag.Bool("collector.iam.disable", false, "Disables the metrics collector for the Cloud IAM")
- DisableKubernetesCollector      = flag.Bool("collector.kubernetes.disable", false, "Disables the metrics collector for the Kubernetes (GKE)")
- DisableLoggingCollector         = flag.Bool("collector.logging.disable", false, "Disables the metrics collector for the Cloud Logging")
- DisableMonitoringCollector      = flag.Bool("collector.monitoring.disable", false, "Disables the metrics collector for the Cloud Monitoring")
- DisableSchedulerCollector       = flag.Bool("collector.scheduler.disable", false, "Disables the metrics collector for the Cloud Scheduler")
- DisableStorageCollector         = flag.Bool("collector.storage.disable", false, "Disables the metrics collector for the Cloud Storage")
+	filter      = flag.String("filter", "", "Filter the results of the request")
+	pagesize    = flag.Int64("max_projects", 10, "Maximum number of projects to include")
+	endpoint    = flag.String("endpoint", ":9402", "The endpoint of the HTTP server")
+	metricsPath = flag.String("path", "/metrics", "The path on which Prometheus metrics will be served")
+
+	DisableArtifactRegistryCollector = flag.Bool("collector.artifact_registry.disable", false, "Disables the metrics collector for the Artifact Registry")
+	DisableCloudRunCollector         = flag.Bool("collector.cloud_run.disable", false, "Disables the metrics collector for Cloud Run")
+	DisableComputeCollector          = flag.Bool("collector.compute.disable", false, "Disables the metrics collector for Compute Engine")
+	DisableEndpointsCollector        = flag.Bool("collector.endpoints.disable", false, "Disables the metrics collector for Cloud Endpoints")
+	DisableEventarcCollector         = flag.Bool("collector.eventarc.disable", false, "Disables the metrics collector for Cloud Eventarc")
+	DisableFunctionsCollector        = flag.Bool("collector.functions.disable", false, "Disables the metrics collector for Cloud Functions")
+	DisableIAMCollector              = flag.Bool("collector.iam.disable", false, "Disables the metrics collector for Cloud IAM")
+	DisableKubernetesCollector       = flag.Bool("collector.kubernetes.disable", false, "Disables the metrics collector for GKE")
+	DisableLoggingCollector          = flag.Bool("collector.logging.disable", false, "Disables the metrics collector for Cloud Logging")
+	DisableMonitoringCollector       = flag.Bool("collector.monitoring.disable", false, "Disables the metrics collector for Cloud Monitoring")
+	DisableSchedulerCollector        = flag.Bool("collector.scheduler.disable", false, "Disables the metrics collector for Cloud Scheduler")
+	DisableStorageCollector          = flag.Bool("collector.storage.disable", false, "Disables the metrics collector for Cloud Storage")
 )
 
 const (
@@ -64,6 +66,7 @@ func handleHealthz(w http.ResponseWriter, _ *http.Request) {
 	w.WriteHeader(http.StatusOK)
 	w.Write([]byte("ok"))
 }
+
 func handleRoot(w http.ResponseWriter, _ *http.Request) {
 	tmpl := template.Must(template.New("root").Parse(rootTemplate))
 	data := struct {
@@ -78,9 +81,8 @@ func handleRoot(w http.ResponseWriter, _ *http.Request) {
 		http.Error(w, msg, http.StatusInternalServerError)
 		return
 	}
-
-	w.Header().Set("Content-Type", "text/html; charset=UTF-8")
 }
+
 func main() {
 	flag.Parse()
 
@@ -102,52 +104,29 @@ func main() {
 	// The other collectors are dependent on this list of projects
 	registry.MustRegister(collector.NewProjectsCollector(account, *filter, *pagesize))
 
-	if !*DisableArtifactRegistryCollector {
-		registry.MustRegister(collector.NewArtifactRegistryCollector(account))
+	collectorConfigs := map[string]struct {
+		register func(account *gcp.Account) prometheus.Collector
+		disable  *bool
+	}{
+		"artifact_registry": {func(account *gcp.Account) prometheus.Collector { return collector.NewArtifactRegistryCollector(account) }, DisableArtifactRegistryCollector},
+		"cloud_run":         {func(account *gcp.Account) prometheus.Collector { return collector.NewCloudRunCollector(account) }, DisableCloudRunCollector},
+		"compute":           {func(account *gcp.Account) prometheus.Collector { return collector.NewComputeCollector(account) }, DisableComputeCollector},
+		"endpoints":         {func(account *gcp.Account) prometheus.Collector { return collector.NewEndpointsCollector(account) }, DisableEndpointsCollector},
+		"eventarc":          {func(account *gcp.Account) prometheus.Collector { return collector.NewEventarcCollector(account) }, DisableEventarcCollector},
+		"functions":         {func(account *gcp.Account) prometheus.Collector { return collector.NewFunctionsCollector(account) }, DisableFunctionsCollector},
+		"iam":               {func(account *gcp.Account) prometheus.Collector { return collector.NewIAMCollector(account) }, DisableIAMCollector},
+		"kubernetes":        {func(account *gcp.Account) prometheus.Collector { return collector.NewKubernetesCollector(account) }, DisableKubernetesCollector},
+		"logging":           {func(account *gcp.Account) prometheus.Collector { return collector.NewLoggingCollector(account) }, DisableLoggingCollector},
+		"monitoring":        {func(account *gcp.Account) prometheus.Collector { return collector.NewMonitoringCollector(account) }, DisableMonitoringCollector},
+		"scheduler":         {func(account *gcp.Account) prometheus.Collector { return collector.NewSchedulerCollector(account) }, DisableSchedulerCollector},
+		"storage":           {func(account *gcp.Account) prometheus.Collector { return collector.NewStorageCollector(account) }, DisableStorageCollector},
 	}
 
-	if !*DisableCloudRunCollector {
-		registry.MustRegister(collector.NewCloudRunCollector(account))
-	}
-
-	if !*DisableComputeCollector {
-		registry.MustRegister(collector.NewComputeCollector(account))
-	}
-
-	if !*DisableEndpointsCollector {
-		registry.MustRegister(collector.NewEndpointsCollector(account))
-	}
-
-	if !*DisableEventarcCollector {
-		registry.MustRegister(collector.NewEventarcCollector(account))
-	}
-
-	if !*DisableFunctionsCollector {
-		registry.MustRegister(collector.NewFunctionsCollector(account))
-	}
-
-	if !*DisableIAMCollector {
-		registry.MustRegister(collector.NewIAMCollector(account))
-	}
-
-	if !*DisableKubernetesCollector {
-		registry.MustRegister(collector.NewKubernetesCollector(account))
-	}
-
-	if !*DisableLoggingCollector {
-		registry.MustRegister(collector.NewLoggingCollector(account))
-	}
-
-	if !*DisableMonitoringCollector {
-		registry.MustRegister(collector.NewMonitoringCollector(account))
-	}
-
-	if !*DisableSchedulerCollector {
-		registry.MustRegister(collector.NewSchedulerCollector(account))
-	}
-
-	if !*DisableStorageCollector {
-		registry.MustRegister(collector.NewStorageCollector(account))
+	for name, config := range collectorConfigs {
+		if config.disable != nil && !*config.disable {
+			log.Printf("Registering collector: %s", name)
+			registry.MustRegister(config.register(account))
+		}
 	}
 
 	mux := http.NewServeMux()
