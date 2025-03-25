@@ -65,7 +65,8 @@ cosign verify \
 ghcr.io/dazwilkin/gcp-exporter:1e42032c25b7b47f4d87d15d620107a662345abf
 ```
 
-> **NOTE** `cosign.pub` may be downloaded [here](./cosign.pub)
+> [!Note]
+> `cosign.pub` may be downloaded [here](./cosign.pub)
 
 To install `cosign`, e.g.:
 
@@ -154,14 +155,17 @@ docker build \
 .
 ```
 
-> **NOTE** See [environment variables](https://golang.org/doc/install/source#environment)
+> [!Note]
+> See [environment variables](https://golang.org/doc/install/source#environment)
 
 ### Podman
 
-> **NOTE** You will need to replace the service names (`alertmanager`, `gcp-exporter`, `gcp-status`, `cadvisor` and `node-exporter`) in `prometheus.yml` with `localhost`
+> [!Note]
+> You will need to replace the service names (`alertmanager`, `gcp-exporter`, `gcp-status`, `cadvisor` and `node-exporter`) in `prometheus.yml` with `localhost`
 
 
-> **NOTE** minimal set of containers pending cAdvisor support for Podman. See cAdvisor [Issue #2424](https://github.com/google/cadvisor/issues/2424) and [Pull #3021](https://github.com/google/cadvisor/pull/3021)
+> [!Note]
+> Minimal set of containers pending cAdvisor support for Podman. See cAdvisor [Issue #2424](https://github.com/google/cadvisor/issues/2424) and [Pull #3021](https://github.com/google/cadvisor/pull/3021)
 >
 > ```bash
 > sed \
@@ -225,17 +229,55 @@ docker.io/prom/node-exporter:v1.1.2 \
 git clone git@github.com:DazWilkin/gcp-exporter.git && cd gcp-exporter
 ```
 
+### Usage
+
+```bash
+gcp-exporter -h
+
+Usage of gcp-exporter:
+  -collector.artifact_registry.disable
+    	Disables the metrics collector for the Artifact Registry
+  -collector.cloud_run.disable
+    	Disables the metrics collector for the Cloud Run
+  -collector.compute.disable
+    	Disables the metrics collector for the Compute
+  -collector.endpoints.disable
+    	Disables the metrics collector for the Cloud Endpoints Services
+  -collector.eventarc.disable
+    	Disables the metrics collector for the Cloud Eventarc
+  -collector.functions.disable
+    	Disables the metrics collector for the Cloud Functions
+  -collector.iam.disable
+    	Disables the metrics collector for the Cloud IAM
+  -collector.kubernetes.disable
+    	Disables the metrics collector for the Kubernetes (GKE)
+  -collector.logging.disable
+    	Disables the metrics collector for the Cloud Logging
+  -collector.monitoring.disable
+    	Disables the metrics collector for the Cloud Monitoring
+  -collector.scheduler.disable
+    	Disables the metrics collector for the Cloud Scheduler
+  -collector.storage.disable
+    	Disables the metrics collector for the Cloud Storage
+  -endpoint string
+    	The endpoint of the HTTP server (default ":9402")
+  -filter string
+    	Filter the results of the request
+  -max_projects int
+    	Maximum number of projects to include (default 10)
+  -path string
+    	The path on which Prometheus metrics will be served (default "/metrics")
+```
+
 Please file issues
 
 ## Metrics
 
 |Name|Type|Description|
 |----|----|-----------|
-|`gcp_exporter_buildinfo`|Counter|A metric with a constant '1' value labeled by OS version, Go version, and the Git commit of the exporter|
-|`gcp_exporter_startime`|Gauge|Exporter start time in Unix epoch seconds|
-|`gcp_artifact_registry_registries`|Gauge|Number of Artifact Registry registries|
-|`gcp_artifact_registry_locations`|Gauge|Number of Artifact Registry locations|
 |`gcp_artifact_registry_formats`|Gauge|Number of Artifact Registry formats|
+|`gcp_artifact_registry_locations`|Gauge|Number of Artifact Registry locations|
+|`gcp_artifact_registry_registries`|Gauge|Number of Artifact Registry registries|
 |`gcp_cloud_endpoints_services`|Gauge|Number of Cloud Endpoints services|
 |`gcp_cloud_functions_functions`|Gauge|Number of Cloud Functions functions|
 |`gcp_cloud_functions_locations`|Gauge|Number of Cloud Functions locations|
@@ -246,12 +288,14 @@ Please file issues
 |`gcp_cloud_run_jobs`|Gauge|Number of Cloud Run jobs|
 |`gcp_cloud_run_services`|Gauge|Number of Cloud Run services|
 |`gcp_cloud_scheduler_jobs`|Gauge|Number of Cloud Scheduler jobs|
-|`gcp_compute_engine_instances`|Gauge|Number of instances|
 |`gcp_compute_engine_forwardingrules`|Gauge|Number of forwardingrules|
-|`gcp_iam_service_accounts`|Gauge|Number of Service Accounts|
+|`gcp_compute_engine_instances`|Gauge|Number of instances|
+|`gcp_exporter_build_info`|Counter|A metric with a constant '1' value labeled by OS version, Go version, and the Git commit of the exporter|
+|`gcp_exporter_start_time`|Gauge|Exporter start time in Unix epoch seconds|
 |`gcp_iam_service_account_keys`|Gauge|Number of Service Account Keys|
-|`gcp_kubernetes_engine_cluster_up`|Gauge|1 if the cluster is running, 0 otherwise|
+|`gcp_iam_service_accounts`|Gauge|Number of Service Accounts|
 |`gcp_kubernetes_engine_cluster_nodes`|Gauge|Number of nodes currently in the cluster|
+|`gcp_kubernetes_engine_cluster_up`|Gauge|1 if the cluster is running, 0 otherwise|
 |`gcp_storage_buckets`|Gauge|Number of buckets|
 
 ## Prometheus API
