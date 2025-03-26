@@ -232,42 +232,42 @@ git clone git@github.com:DazWilkin/gcp-exporter.git && cd gcp-exporter
 ### Usage
 
 ```bash
-gcp-exporter -h
+gcp-exporter --h
 
 Usage of gcp-exporter:
-  -collector.artifact_registry.disable
+  --collector.artifact_registry.disable
     	Disables the metrics collector for the Artifact Registry
-  -collector.cloud_run.disable
+  --collector.cloud_run.disable
     	Disables the metrics collector for Cloud Run
-  -collector.compute.disable
+  --collector.compute.disable
     	Disables the metrics collector for Compute Engine
-  -collector.endpoints.disable
+  --collector.endpoints.disable
     	Disables the metrics collector for Cloud Endpoints
-  -collector.eventarc.disable
+  --collector.eventarc.disable
     	Disables the metrics collector for Cloud Eventarc
-  -collector.functions.disable
+  --collector.functions.disable
     	Disables the metrics collector for Cloud Functions
-  -collector.iam.disable
+  --collector.iam.disable
     	Disables the metrics collector for Cloud IAM
-  -collector.kubernetes.config string
+  --collector.gke.config string
     	Specifies specific settings for the collector (default "{\"enableClusterAndNodePoolInfoMetric\": false}")
-  -collector.kubernetes.disable
-    	Disables the metrics collector for Google Kubernetes Engine (GKE)
-  -collector.logging.disable
+  --collector.gke.disable
+    	Disables the metrics collector for GKE
+  --collector.logging.disable
     	Disables the metrics collector for Cloud Logging
-  -collector.monitoring.disable
+  --collector.monitoring.disable
     	Disables the metrics collector for Cloud Monitoring
-  -collector.scheduler.disable
+  --collector.scheduler.disable
     	Disables the metrics collector for Cloud Scheduler
-  -collector.storage.disable
+  --collector.storage.disable
     	Disables the metrics collector for Cloud Storage
-  -endpoint string
+  --endpoint string
     	The endpoint of the HTTP server (default ":9402")
-  -filter string
+  --filter string
     	Filter the results of the request
-  -max_projects int
+  --max_projects int
     	Maximum number of projects to include (default 10)
-  -path string
+  --path string
     	The path on which Prometheus metrics will be served (default "/metrics")
 ```
 
@@ -296,10 +296,10 @@ Please file issues
 |`gcp_exporter_start_time`|Gauge|Exporter start time in Unix epoch seconds|
 |`gcp_iam_service_account_keys`|Gauge|Number of Service Account Keys|
 |`gcp_iam_service_accounts`|Gauge|Number of Service Accounts|
-|`gcp_kubernetes_engine_cluster_info`|Gauge|Exports detailed information from the Cluster Control Plane, including `id`, `mode`, `endpoint`, `network`, `subnetwork`, `initial_cluster_version`, and `node_pools_count`. 1 if the Cluster is running, 0 otherwise. Enabled when the `-collector.kubernetes.config` flag is set|
-|`gcp_kubernetes_engine_cluster_node_pools_info`|Gauge|Exports detailed information from the Cluster Node Pools, including `etag`, `cluster_id`, `autoscaling`, `disk_size_gb`, `disk_type`, `image_type`, `machine_type`, `locations`, `spot`, and `preemptible`. 1 if the Node Pool is running, 0 otherwise. Enabled when the `-collector.kubernetes.config` flag is set|
-|`gcp_kubernetes_engine_cluster_nodes`|Gauge|Number of nodes currently in the Cluster|
-|`gcp_kubernetes_engine_cluster_up`|Gauge|1 if the Cluster is running, 0 otherwise|
+|`gcp_gke_info`|Gauge|Exports detailed information from the Cluster Control Plane, including `id`, `mode`, `endpoint`, `network`, `subnetwork`, `initial_cluster_version`, and `node_pools_count`. 1 if the Cluster is running, 0 otherwise. Enabled when the `--collector.gke.config` flag is set|
+|`gcp_gke_node_pools_info`|Gauge|Exports detailed information from the Cluster Node Pools, including `etag`, `cluster_id`, `autoscaling`, `disk_size_gb`, `disk_type`, `image_type`, `machine_type`, `locations`, `spot`, and `preemptible`. 1 if the Node Pool is running, 0 otherwise. Enabled when the `--collector.gke.config` flag is set|
+|`gcp_gke_nodes`|Gauge|Number of nodes currently in the Cluster|
+|`gcp_gke_up`|Gauge|1 if the Cluster is running, 0 otherwise|
 |`gcp_storage_buckets`|Gauge|Number of buckets|
 
 ## Prometheus API
@@ -327,10 +327,10 @@ gcp_compute_engine_forwardingrules
 gcp_compute_engine_instances
 gcp_exporter_build_info
 gcp_exporter_start_time
-gcp_kubernetes_engine_cluster_info
-gcp_kubernetes_engine_cluster_node_pools_info
-gcp_kubernetes_engine_cluster_nodes
-gcp_kubernetes_engine_cluster_up
+gcp_gke_cluster_info
+gcp_gke_cluster_node_pools_info
+gcp_gke_cluster_nodes
+gcp_gke_cluster_up
 gcp_projects_count
 gcp_storage_buckets
 ```

@@ -2,7 +2,6 @@ package collector
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
@@ -18,13 +17,9 @@ import (
 	"google.golang.org/api/googleapi"
 )
 
-type KubernetesCollectorConfig struct {
-	EnableClusterAndNodePoolInfoMetric bool `json:"enableClusterAndNodePoolInfoMetric"`
-}
-
-type KubernetesCollector struct {
+type GKECollector struct {
 	account *gcp.Account
-	config KubernetesCollectorConfig
+	EnableInfoMetricGKECollector bool
 
 	Info          *prometheus.Desc
 	NodePoolsInfo *prometheus.Desc
@@ -32,40 +27,32 @@ type KubernetesCollector struct {
 	Up            *prometheus.Desc
 }
 
-func NewKubernetesCollector(account *gcp.Account, config string) *KubernetesCollector {
-	var collectorConfig = KubernetesCollectorConfig{EnableClusterAndNodePoolInfoMetric: false}
-
-	if err := json.Unmarshal([]byte(config), &collectorConfig); err != nil {
-		log.Println("Unable to decode JSON:", err)
-	} else {
-		log.Printf("[KubernetesCollector] Config: %+v\n", collectorConfig)
-	}
-
-	fqName := name("kubernetes_engine")
+func NewGKECollector(account *gcp.Account, EnableInfoMetricGKECollector bool) *GKECollector {
+	fqName := name("gke")
 	labelKeys := []string{"project", "name", "location", "version"}
 
-	return &KubernetesCollector{
+	return &GKECollector{
 		account: account,
-		config:  collectorConfig,
+		EnableInfoMetricGKECollector: EnableInfoMetricGKECollector,
 		Up: prometheus.NewDesc(
-			fqName("cluster_up"),
+			fqName("up"),
 			"1 if the cluster is running, 0 otherwise",
 			labelKeys, nil,
 		),
 		Info: prometheus.NewDesc(
-			fqName("cluster_info"),
+			fqName("info"),
 			"Cluster control plane information. 1 if the cluster is running, 0 otherwise",
 			append(labelKeys, "id", "mode", "endpoint", "network", "subnetwork",
 				"initial_cluster_version", "node_pools_count"),
 			nil,
 		),
 		Nodes: prometheus.NewDesc(
-			fqName("cluster_nodes"),
+			fqName("nodes"),
 			"Number of nodes currently in the cluster",
 			labelKeys, nil,
 		),
 		NodePoolsInfo: prometheus.NewDesc(
-			fqName("cluster_node_pools_info"),
+			fqName("node_pools_info"),
 			"Cluster Node Pools Information. 1 if the Node Pool is running, 0 otherwise",
 			append(labelKeys, "etag", "cluster_id", "autoscaling", "disk_size_gb",
 				"disk_type", "image_type", "machine_type", "locations", "spot", "preemptible"),
@@ -74,7 +61,7 @@ func NewKubernetesCollector(account *gcp.Account, config string) *KubernetesColl
 	}
 }
 
-func (c *KubernetesCollector) Collect(ch chan<- prometheus.Metric) {
+func (c *GKECollector) Collect(ch chan<- prometheus.Metric) {
 	ctx := context.Background()
 	containerService, err := container.NewService(ctx)
 	if err != nil {
@@ -93,10 +80,10 @@ func (c *KubernetesCollector) Collect(ch chan<- prometheus.Metric) {
 	wg.Wait()
 }
 
-func (c *KubernetesCollector) collectProjectMetrics(ctx context.Context, containerService *container.Service,
+func (c *GKECollector) collectProjectMetrics(ctx context.Context, containerService *container.Service,
 	p *cloudresourcemanager.Project, ch chan<- prometheus.Metric) {
 
-	log.Printf("[KubernetesCollector:go] Project: %s", p.ProjectId)
+	log.Printf("[GKECollector:go] Project: %s", p.ProjectId)
 	parent := fmt.Sprintf("projects/%s/locations/-", p.ProjectId)
 	resp, err := containerService.Projects.Locations.Clusters.List(parent).Context(ctx).Do()
 
@@ -114,10 +101,10 @@ func (c *KubernetesCollector) collectProjectMetrics(ctx context.Context, contain
 	}
 }
 
-func (c *KubernetesCollector) collectClusterMetrics(p *cloudresourcemanager.Project, cluster *container.Cluster,
+func (c *GKECollector) collectClusterMetrics(p *cloudresourcemanager.Project, cluster *container.Cluster,
 	ch chan<- prometheus.Metric) {
 
-	log.Printf("[KubernetesCollector] cluster: %s", cluster.Name)
+	log.Printf("[GKECollector] cluster: %s", cluster.Name)
 
 	clusterStatus := 0.0
 	if cluster.Status == "RUNNING" {
@@ -130,12 +117,12 @@ func (c *KubernetesCollector) collectClusterMetrics(p *cloudresourcemanager.Proj
 	ch <- prometheus.MustNewConstMetric(c.Nodes, prometheus.GaugeValue, float64(cluster.CurrentNodeCount),
 		p.ProjectId, cluster.Name, cluster.Location, cluster.CurrentNodeVersion)
 
-	if c.config.EnableClusterAndNodePoolInfoMetric {
+	if c.EnableInfoMetricGKECollector {
 		c.collectNodePoolMetrics(p, cluster, ch, clusterStatus)
 	}
 }
 
-func (c *KubernetesCollector) collectNodePoolMetrics(p *cloudresourcemanager.Project, cluster *container.Cluster,
+func (c *GKECollector) collectNodePoolMetrics(p *cloudresourcemanager.Project, cluster *container.Cluster,
 	ch chan<- prometheus.Metric, clusterStatus float64) {
 
 	if cluster.NodePools == nil || len(cluster.NodePools) == 0 {
@@ -173,7 +160,7 @@ func (c *KubernetesCollector) collectNodePoolMetrics(p *cloudresourcemanager.Pro
 	}
 }
 
-func (c *KubernetesCollector) Describe(ch chan<- *prometheus.Desc) {
+func (c *GKECollector) Describe(ch chan<- *prometheus.Desc) {
 	ch <- c.Info
 	ch <- c.NodePoolsInfo
 	ch <- c.Nodes
