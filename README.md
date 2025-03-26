@@ -235,40 +235,40 @@ git clone git@github.com:DazWilkin/gcp-exporter.git && cd gcp-exporter
 gcp-exporter --h
 
 Usage of gcp-exporter:
-  --collector.artifact_registry.disable
-    	Disables the metrics collector for the Artifact Registry
-  --collector.cloud_run.disable
-    	Disables the metrics collector for Cloud Run
-  --collector.compute.disable
-    	Disables the metrics collector for Compute Engine
-  --collector.endpoints.disable
-    	Disables the metrics collector for Cloud Endpoints
-  --collector.eventarc.disable
-    	Disables the metrics collector for Cloud Eventarc
-  --collector.functions.disable
-    	Disables the metrics collector for Cloud Functions
-  --collector.iam.disable
-    	Disables the metrics collector for Cloud IAM
-  --collector.gke.config string
-    	Specifies specific settings for the collector (default "{\"enableClusterAndNodePoolInfoMetric\": false}")
-  --collector.gke.disable
-    	Disables the metrics collector for GKE
-  --collector.logging.disable
-    	Disables the metrics collector for Cloud Logging
-  --collector.monitoring.disable
-    	Disables the metrics collector for Cloud Monitoring
-  --collector.scheduler.disable
-    	Disables the metrics collector for Cloud Scheduler
-  --collector.storage.disable
-    	Disables the metrics collector for Cloud Storage
-  --endpoint string
-    	The endpoint of the HTTP server (default ":9402")
-  --filter string
-    	Filter the results of the request
-  --max_projects int
-    	Maximum number of projects to include (default 10)
-  --path string
-    	The path on which Prometheus metrics will be served (default "/metrics")
+  -collector.artifact_registry.disable
+      Disables the metrics collector for the Artifact Registry
+  -collector.cloud_run.disable
+      Disables the metrics collector for Cloud Run
+  -collector.compute.disable
+      Disables the metrics collector for Compute Engine
+  -collector.endpoints.disable
+      Disables the metrics collector for Cloud Endpoints
+  -collector.eventarc.disable
+      Disables the metrics collector for Cloud Eventarc
+  -collector.functions.disable
+      Disables the metrics collector for Cloud Functions
+  -collector.gke.disable
+      Disables the metrics collector for Google Kubernetes Engine (GKE)
+  -collector.gke.infoMetric.enable
+      Specifies specific settings for the collector
+  -collector.iam.disable
+      Disables the metrics collector for Cloud IAM
+  -collector.logging.disable
+      Disables the metrics collector for Cloud Logging
+  -collector.monitoring.disable
+      Disables the metrics collector for Cloud Monitoring
+  -collector.scheduler.disable
+      Disables the metrics collector for Cloud Scheduler
+  -collector.storage.disable
+      Disables the metrics collector for Cloud Storage
+  -endpoint string
+      The endpoint of the HTTP server (default ":9402")
+  -filter string
+      Filter the results of the request
+  -max_projects int
+      Maximum number of projects to include (default 10)
+  -path string
+      The path on which Prometheus metrics will be served (default "/metrics")
 ```
 
 Please file issues
