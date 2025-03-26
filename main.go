@@ -39,11 +39,13 @@ var (
 	disableEventarcCollector         = flag.Bool("collector.eventarc.disable", false, "Disables the metrics collector for Cloud Eventarc")
 	disableFunctionsCollector        = flag.Bool("collector.functions.disable", false, "Disables the metrics collector for Cloud Functions")
 	disableIAMCollector              = flag.Bool("collector.iam.disable", false, "Disables the metrics collector for Cloud IAM")
-	disableKubernetesCollector       = flag.Bool("collector.kubernetes.disable", false, "Disables the metrics collector for GKE")
+	disableKubernetesCollector       = flag.Bool("collector.kubernetes.disable", false, "Disables the metrics collector for Google Cloud Engine")
 	disableLoggingCollector          = flag.Bool("collector.logging.disable", false, "Disables the metrics collector for Cloud Logging")
 	disableMonitoringCollector       = flag.Bool("collector.monitoring.disable", false, "Disables the metrics collector for Cloud Monitoring")
 	disableSchedulerCollector        = flag.Bool("collector.scheduler.disable", false, "Disables the metrics collector for Cloud Scheduler")
 	disableStorageCollector          = flag.Bool("collector.storage.disable", false, "Disables the metrics collector for Cloud Storage")
+
+	ConfigKubernetesCollector				 = flag.String("collector.kubernetes.config", `{"enableClusterAndNodePoolInfoMetric": false}`, "Specifies specific settings for the GKE collector")
 )
 
 const (
@@ -115,7 +117,7 @@ func main() {
 		"eventarc":          {func(account *gcp.Account) prometheus.Collector { return collector.NewEventarcCollector(account) }, disableEventarcCollector},
 		"functions":         {func(account *gcp.Account) prometheus.Collector { return collector.NewFunctionsCollector(account) }, disableFunctionsCollector},
 		"iam":               {func(account *gcp.Account) prometheus.Collector { return collector.NewIAMCollector(account) }, disableIAMCollector},
-		"kubernetes":        {func(account *gcp.Account) prometheus.Collector { return collector.NewKubernetesCollector(account) }, disableKubernetesCollector},
+		"kubernetes":        {func(account *gcp.Account) prometheus.Collector { return collector.NewKubernetesCollector(account, *ConfigKubernetesCollector) }, disableKubernetesCollector},
 		"logging":           {func(account *gcp.Account) prometheus.Collector { return collector.NewLoggingCollector(account) }, disableLoggingCollector},
 		"monitoring":        {func(account *gcp.Account) prometheus.Collector { return collector.NewMonitoringCollector(account) }, disableMonitoringCollector},
 		"scheduler":         {func(account *gcp.Account) prometheus.Collector { return collector.NewSchedulerCollector(account) }, disableSchedulerCollector},

@@ -249,8 +249,10 @@ Usage of gcp-exporter:
     	Disables the metrics collector for the Cloud Functions
   -collector.iam.disable
     	Disables the metrics collector for the Cloud IAM
+  -collector.kubernetes.config string
+    	Specifies specific settings for the GKE collector (default "{\"enableClusterAndNodePoolInfoMetric\": false}")
   -collector.kubernetes.disable
-    	Disables the metrics collector for the Kubernetes (GKE)
+    	Disables the metrics collector for Google Cloud Engine
   -collector.logging.disable
     	Disables the metrics collector for the Cloud Logging
   -collector.monitoring.disable
@@ -294,8 +296,10 @@ Please file issues
 |`gcp_exporter_start_time`|Gauge|Exporter start time in Unix epoch seconds|
 |`gcp_iam_service_account_keys`|Gauge|Number of Service Account Keys|
 |`gcp_iam_service_accounts`|Gauge|Number of Service Accounts|
-|`gcp_kubernetes_engine_cluster_nodes`|Gauge|Number of nodes currently in the cluster|
-|`gcp_kubernetes_engine_cluster_up`|Gauge|1 if the cluster is running, 0 otherwise|
+|`gcp_kubernetes_engine_cluster_info`|Gauge|Exports detailed information from the Cluster Control Plane, including `id`, `mode`, `endpoint`, `network`, `subnetwork`, `initial_cluster_version`, and `node_pools_count`. 1 if the Cluster is running, 0 otherwise. Enabled when the `-collector.kubernetes.config` flag is set|
+|`gcp_kubernetes_engine_cluster_node_pools_info`|Gauge|Exports detailed information from the Cluster Node Pools, including `etag`, `cluster_id`, `autoscaling`, `disk_size_gb`, `disk_type`, `image_type`, `machine_type`, `locations`, `spot`, and `preemptible`. 1 if the Node Pool is running, 0 otherwise. Enabled when the `-collector.kubernetes.config` flag is set|
+|`gcp_kubernetes_engine_cluster_nodes`|Gauge|Number of nodes currently in the Cluster|
+|`gcp_kubernetes_engine_cluster_up`|Gauge|1 if the Cluster is running, 0 otherwise|
 |`gcp_storage_buckets`|Gauge|Number of buckets|
 
 ## Prometheus API
@@ -323,6 +327,8 @@ gcp_compute_engine_forwardingrules
 gcp_compute_engine_instances
 gcp_exporter_build_info
 gcp_exporter_start_time
+gcp_kubernetes_engine_cluster_info
+gcp_kubernetes_engine_cluster_node_pools_info
 gcp_kubernetes_engine_cluster_nodes
 gcp_kubernetes_engine_cluster_up
 gcp_projects_count
