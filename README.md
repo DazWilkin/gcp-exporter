@@ -238,29 +238,29 @@ Usage of gcp-exporter:
   -collector.artifact_registry.disable
     	Disables the metrics collector for the Artifact Registry
   -collector.cloud_run.disable
-    	Disables the metrics collector for the Cloud Run
+    	Disables the metrics collector for Cloud Run
   -collector.compute.disable
-    	Disables the metrics collector for the Compute
+    	Disables the metrics collector for Compute Engine
   -collector.endpoints.disable
-    	Disables the metrics collector for the Cloud Endpoints Services
+    	Disables the metrics collector for Cloud Endpoints
   -collector.eventarc.disable
-    	Disables the metrics collector for the Cloud Eventarc
+    	Disables the metrics collector for Cloud Eventarc
   -collector.functions.disable
-    	Disables the metrics collector for the Cloud Functions
+    	Disables the metrics collector for Cloud Functions
   -collector.iam.disable
-    	Disables the metrics collector for the Cloud IAM
+    	Disables the metrics collector for Cloud IAM
   -collector.kubernetes.config string
-    	Specifies specific settings for the Google Kubernetes Engine (default "{\"enableClusterAndNodePoolInfoMetric\": false}")
+    	Specifies specific settings for the collector (default "{\"enableClusterAndNodePoolInfoMetric\": false}")
   -collector.kubernetes.disable
-    	Disables the metrics collector for Google Cloud Engine
+    	Disables the metrics collector for Google Kubernetes Engine (GKE)
   -collector.logging.disable
-    	Disables the metrics collector for the Cloud Logging
+    	Disables the metrics collector for Cloud Logging
   -collector.monitoring.disable
-    	Disables the metrics collector for the Cloud Monitoring
+    	Disables the metrics collector for Cloud Monitoring
   -collector.scheduler.disable
-    	Disables the metrics collector for the Cloud Scheduler
+    	Disables the metrics collector for Cloud Scheduler
   -collector.storage.disable
-    	Disables the metrics collector for the Cloud Storage
+    	Disables the metrics collector for Cloud Storage
   -endpoint string
     	The endpoint of the HTTP server (default ":9402")
   -filter string
