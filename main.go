@@ -39,13 +39,13 @@ var (
 	disableEventarcCollector         = flag.Bool("collector.eventarc.disable", false, "Disables the metrics collector for Cloud Eventarc")
 	disableFunctionsCollector        = flag.Bool("collector.functions.disable", false, "Disables the metrics collector for Cloud Functions")
 	disableIAMCollector              = flag.Bool("collector.iam.disable", false, "Disables the metrics collector for Cloud IAM")
-	disableKubernetesCollector       = flag.Bool("collector.kubernetes.disable", false, "Disables the metrics collector for Google Cloud Engine")
+	disableKubernetesCollector       = flag.Bool("collector.kubernetes.disable", false, "Disables the metrics collector for Google Kubernetes Engine (GKE)")
 	disableLoggingCollector          = flag.Bool("collector.logging.disable", false, "Disables the metrics collector for Cloud Logging")
 	disableMonitoringCollector       = flag.Bool("collector.monitoring.disable", false, "Disables the metrics collector for Cloud Monitoring")
 	disableSchedulerCollector        = flag.Bool("collector.scheduler.disable", false, "Disables the metrics collector for Cloud Scheduler")
 	disableStorageCollector          = flag.Bool("collector.storage.disable", false, "Disables the metrics collector for Cloud Storage")
 
-	ConfigKubernetesCollector				 = flag.String("collector.kubernetes.config", `{"enableClusterAndNodePoolInfoMetric": false}`, "Specifies specific settings for the GKE collector")
+	ConfigKubernetesCollector				 = flag.String("collector.kubernetes.config", `{"enableClusterAndNodePoolInfoMetric": false}`, "Specifies specific settings for the collector")
 )
 
 const (

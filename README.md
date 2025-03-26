@@ -250,7 +250,7 @@ Usage of gcp-exporter:
   -collector.iam.disable
     	Disables the metrics collector for the Cloud IAM
   -collector.kubernetes.config string
-    	Specifies specific settings for the GKE collector (default "{\"enableClusterAndNodePoolInfoMetric\": false}")
+    	Specifies specific settings for the Google Kubernetes Engine (default "{\"enableClusterAndNodePoolInfoMetric\": false}")
   -collector.kubernetes.disable
     	Disables the metrics collector for Google Cloud Engine
   -collector.logging.disable
