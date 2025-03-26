@@ -232,7 +232,7 @@ git clone git@github.com:DazWilkin/gcp-exporter.git && cd gcp-exporter
 ### Usage
 
 ```bash
-gcp-exporter --h
+gcp-exporter --help
 
 Usage of gcp-exporter:
   --collector.artifact_registry.disable
@@ -247,10 +247,10 @@ Usage of gcp-exporter:
       Disables the metrics collector for Cloud Eventarc
   --collector.functions.disable
       Disables the metrics collector for Cloud Functions
-  --collector.gke.disable
+  -collector.gke.ControlPlaneAndNodePoolInfoMetrics.enable
+      Enable the metrics collector for Google Kubernetes Engine (GKE) to collect ControlPlane and NodePool metrics
+  -collector.gke.disable
       Disables the metrics collector for Google Kubernetes Engine (GKE)
-  --collector.gke.infoMetric.enable
-      Specifies specific settings for the collector
   --collector.iam.disable
       Disables the metrics collector for Cloud IAM
   --collector.logging.disable
