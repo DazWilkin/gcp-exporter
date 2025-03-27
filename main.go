@@ -45,7 +45,7 @@ var (
 	disableSchedulerCollector        = flag.Bool("collector.scheduler.disable", false, "Disables the metrics collector for Cloud Scheduler")
 	disableStorageCollector          = flag.Bool("collector.storage.disable", false, "Disables the metrics collector for Cloud Storage")
 
-	EnableControlPlaneAndNodePoolInfoMetricsGKECollector = flag.Bool("collector.gke.ControlPlaneAndNodePoolInfoMetrics.enable", false, "Enable the metrics collector for Google Kubernetes Engine (GKE) to collect ControlPlane and NodePool metrics")
+	EnableExtendedMetricsGKECollector = flag.Bool("collector.gke.extendedMetrics.enable", false, "Enable the metrics collector for Google Kubernetes Engine (GKE) to collect ControlPlane and NodePool metrics")
 )
 
 const (
@@ -117,7 +117,7 @@ func main() {
 		"eventarc":          {func(account *gcp.Account) prometheus.Collector { return collector.NewEventarcCollector(account) }, disableEventarcCollector},
 		"functions":         {func(account *gcp.Account) prometheus.Collector { return collector.NewFunctionsCollector(account) }, disableFunctionsCollector},
 		"iam":               {func(account *gcp.Account) prometheus.Collector { return collector.NewIAMCollector(account) }, disableIAMCollector},
-		"gke":               {func(account *gcp.Account) prometheus.Collector { return collector.NewGKECollector(account, *EnableControlPlaneAndNodePoolInfoMetricsGKECollector) }, disableGKECollector},
+		"gke":               {func(account *gcp.Account) prometheus.Collector { return collector.NewGKECollector(account, *EnableExtendedMetricsGKECollector) }, disableGKECollector},
 		"logging":           {func(account *gcp.Account) prometheus.Collector { return collector.NewLoggingCollector(account) }, disableLoggingCollector},
 		"monitoring":        {func(account *gcp.Account) prometheus.Collector { return collector.NewMonitoringCollector(account) }, disableMonitoringCollector},
 		"scheduler":         {func(account *gcp.Account) prometheus.Collector { return collector.NewSchedulerCollector(account) }, disableSchedulerCollector},

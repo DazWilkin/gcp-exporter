@@ -19,7 +19,7 @@ import (
 
 type GKECollector struct {
 	account *gcp.Account
-	EnableInfoMetricGKECollector bool
+	enableExtendedMetrics bool
 
 	Info          *prometheus.Desc
 	NodePoolsInfo *prometheus.Desc
@@ -27,13 +27,13 @@ type GKECollector struct {
 	Up            *prometheus.Desc
 }
 
-func NewGKECollector(account *gcp.Account, EnableInfoMetricGKECollector bool) *GKECollector {
+func NewGKECollector(account *gcp.Account, enableExtendedMetrics bool) *GKECollector {
 	fqName := name("gke")
 	labelKeys := []string{"project", "name", "location", "version"}
 
 	return &GKECollector{
 		account: account,
-		EnableInfoMetricGKECollector: EnableInfoMetricGKECollector,
+		enableExtendedMetrics: enableExtendedMetrics,
 		Up: prometheus.NewDesc(
 			fqName("up"),
 			"1 if the cluster is running, 0 otherwise",
@@ -117,12 +117,12 @@ func (c *GKECollector) collectClusterMetrics(p *cloudresourcemanager.Project, cl
 	ch <- prometheus.MustNewConstMetric(c.Nodes, prometheus.GaugeValue, float64(cluster.CurrentNodeCount),
 		p.ProjectId, cluster.Name, cluster.Location, cluster.CurrentNodeVersion)
 
-	if c.EnableInfoMetricGKECollector {
-		c.collectNodePoolMetrics(p, cluster, ch, clusterStatus)
+	if c.enableExtendedMetrics {
+		c.collectExtendedMetrics(p, cluster, ch, clusterStatus)
 	}
 }
 
-func (c *GKECollector) collectNodePoolMetrics(p *cloudresourcemanager.Project, cluster *container.Cluster,
+func (c *GKECollector) collectExtendedMetrics(p *cloudresourcemanager.Project, cluster *container.Cluster,
 	ch chan<- prometheus.Metric, clusterStatus float64) {
 
 	if cluster.NodePools == nil || len(cluster.NodePools) == 0 {
