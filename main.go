@@ -114,31 +114,63 @@ func main() {
 	registry.MustRegister(collector.NewProjectsCollector(account, *filter, *pagesize))
 
 	collectorConfigs := map[string]struct {
-		register func(account *gcp.Account) prometheus.Collector
-		disable  *bool
+		collector prometheus.Collector
+		disable   *bool
 	}{
-		"artifact_registry": {func(account *gcp.Account) prometheus.Collector {
-			return collector.NewArtifactRegistryCollector(account)
-		}, disableArtifactRegistryCollector},
-		"cloud_run": {func(account *gcp.Account) prometheus.Collector { return collector.NewCloudRunCollector(account) }, disableCloudRunCollector},
-		"compute":   {func(account *gcp.Account) prometheus.Collector { return collector.NewComputeCollector(account) }, disableComputeCollector},
-		"endpoints": {func(account *gcp.Account) prometheus.Collector { return collector.NewEndpointsCollector(account) }, disableEndpointsCollector},
-		"eventarc":  {func(account *gcp.Account) prometheus.Collector { return collector.NewEventarcCollector(account) }, disableEventarcCollector},
-		"functions": {func(account *gcp.Account) prometheus.Collector { return collector.NewFunctionsCollector(account) }, disableFunctionsCollector},
-		"iam":       {func(account *gcp.Account) prometheus.Collector { return collector.NewIAMCollector(account) }, disableIAMCollector},
-		"gke": {func(account *gcp.Account) prometheus.Collector {
-			return collector.NewGKECollector(account, *enableExtendedMetricsGKECollector)
-		}, disableGKECollector},
-		"logging":    {func(account *gcp.Account) prometheus.Collector { return collector.NewLoggingCollector(account) }, disableLoggingCollector},
-		"monitoring": {func(account *gcp.Account) prometheus.Collector { return collector.NewMonitoringCollector(account) }, disableMonitoringCollector},
-		"scheduler":  {func(account *gcp.Account) prometheus.Collector { return collector.NewSchedulerCollector(account) }, disableSchedulerCollector},
-		"storage":    {func(account *gcp.Account) prometheus.Collector { return collector.NewStorageCollector(account) }, disableStorageCollector},
+		"artifact_registry": {
+			collector.NewArtifactRegistryCollector(account),
+			disableArtifactRegistryCollector,
+		},
+		"cloud_run": {
+			collector.NewCloudRunCollector(account),
+			disableCloudRunCollector,
+		},
+		"compute": {
+			collector.NewComputeCollector(account),
+			disableComputeCollector,
+		},
+		"endpoints": {
+			collector.NewEndpointsCollector(account),
+			disableEndpointsCollector,
+		},
+		"eventarc": {
+			collector.NewEventarcCollector(account),
+			disableEventarcCollector,
+		},
+		"functions": {
+			collector.NewFunctionsCollector(account),
+			disableFunctionsCollector,
+	      	},
+		"iam": {
+			collector.NewIAMCollector(account),
+			disableIAMCollector,
+		},
+		"gke": {
+			collector.NewGKECollector(account, *enableExtendedMetricsGKECollector),
+			disableGKECollector,
+		},
+		"logging": {
+			collector.NewLoggingCollector(account),
+			disableLoggingCollector,
+		},
+		"monitoring": {
+			collector.NewMonitoringCollector(account),
+			disableMonitoringCollector,
+		},
+		"scheduler": {
+			collector.NewSchedulerCollector(account),
+			disableSchedulerCollector,
+		},
+		"storage": {
+			collector.NewStorageCollector(account),
+			disableStorageCollector,
+		},
 	}
 
 	for name, config := range collectorConfigs {
 		if config.disable != nil && !*config.disable {
 			log.Printf("Registering collector: %s", name)
-			registry.MustRegister(config.register(account))
+			registry.MustRegister(config.collector)
 		}
 	}
 
