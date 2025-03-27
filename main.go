@@ -66,7 +66,10 @@ const (
 
 func handleHealthz(w http.ResponseWriter, _ *http.Request) {
 	w.WriteHeader(http.StatusOK)
-	w.Write([]byte("ok"))
+	if _, err := w.Write([]byte("ok")); err != nil {
+		msg := "error writing healthz handler"
+		log.Printf("[handleHealthz] %s: %v", msg, err)
+	}
 }
 
 func handleRoot(w http.ResponseWriter, _ *http.Request) {
