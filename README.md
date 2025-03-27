@@ -251,6 +251,10 @@ Usage of gcp-exporter:
       Disables the metrics collector for Google Kubernetes Engine (GKE)
   --collector.gke.extendedMetrics.enable
       Enable the metrics collector for Google Kubernetes Engine (GKE) to collect ControlPlane and NodePool metrics
+  --collector.gke.extendedMetrics.extraLabelsClusterInfo string
+      Extra labels for Cluster Info in extended metrics, extracted from the ResourceLabels field of the Cluster object, with a label_ prefix added to each label name
+  --collector.gke.extendedMetrics.extraLabelsNodePoolsInfo string
+      Extra labels for Node Pools Info in extended metrics, extracted from the ResourceLabels field of the Cluster.NodePools object, with a label_ prefix added to each label name
   --collector.iam.disable
       Disables the metrics collector for Cloud IAM
   --collector.logging.disable
