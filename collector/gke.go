@@ -18,7 +18,7 @@ import (
 )
 
 type GKECollector struct {
-	account *gcp.Account
+	account               *gcp.Account
 	enableExtendedMetrics bool
 
 	Info          *prometheus.Desc
@@ -32,8 +32,9 @@ func NewGKECollector(account *gcp.Account, enableExtendedMetrics bool) *GKEColle
 	labelKeys := []string{"project", "name", "location", "version"}
 
 	return &GKECollector{
-		account: account,
+		account:               account,
 		enableExtendedMetrics: enableExtendedMetrics,
+
 		Up: prometheus.NewDesc(
 			fqName("up"),
 			"1 if the cluster is running, 0 otherwise",
@@ -125,7 +126,7 @@ func (c *GKECollector) collectClusterMetrics(p *cloudresourcemanager.Project, cl
 func (c *GKECollector) collectExtendedMetrics(p *cloudresourcemanager.Project, cluster *container.Cluster,
 	ch chan<- prometheus.Metric, clusterStatus float64) {
 
-	if cluster.NodePools == nil || len(cluster.NodePools) == 0 {
+	if len(cluster.NodePools) == 0 {
 		return
 	}
 
