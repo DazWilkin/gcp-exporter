@@ -45,7 +45,7 @@ var (
 	disableSchedulerCollector        = flag.Bool("collector.scheduler.disable", false, "Disables the metrics collector for Cloud Scheduler")
 	disableStorageCollector          = flag.Bool("collector.storage.disable", false, "Disables the metrics collector for Cloud Storage")
 
-	EnableExtendedMetricsGKECollector = flag.Bool("collector.gke.extendedMetrics.enable", false, "Enable the metrics collector for Google Kubernetes Engine (GKE) to collect ControlPlane and NodePool metrics")
+	enableExtendedMetricsGKECollector = flag.Bool("collector.gke.extendedMetrics.enable", false, "Enable the metrics collector for Google Kubernetes Engine (GKE) to collect ControlPlane and NodePool metrics")
 )
 
 const (
@@ -88,6 +88,10 @@ func handleRoot(w http.ResponseWriter, _ *http.Request) {
 func main() {
 	flag.Parse()
 
+	if *disableGKECollector && *enableExtendedMetricsGKECollector {
+		log.Println("[main] `--enabledExtendedMetricsGKECollector` has no effect because `--disableGKECollector=true`")
+	}
+
 	if GitCommit == "" {
 		log.Println("[main] GitCommit value unchanged: expected to be set during build")
 	}
@@ -110,18 +114,22 @@ func main() {
 		register func(account *gcp.Account) prometheus.Collector
 		disable  *bool
 	}{
-		"artifact_registry": {func(account *gcp.Account) prometheus.Collector { return collector.NewArtifactRegistryCollector(account) }, disableArtifactRegistryCollector},
-		"cloud_run":         {func(account *gcp.Account) prometheus.Collector { return collector.NewCloudRunCollector(account) }, disableCloudRunCollector},
-		"compute":           {func(account *gcp.Account) prometheus.Collector { return collector.NewComputeCollector(account) }, disableComputeCollector},
-		"endpoints":         {func(account *gcp.Account) prometheus.Collector { return collector.NewEndpointsCollector(account) }, disableEndpointsCollector},
-		"eventarc":          {func(account *gcp.Account) prometheus.Collector { return collector.NewEventarcCollector(account) }, disableEventarcCollector},
-		"functions":         {func(account *gcp.Account) prometheus.Collector { return collector.NewFunctionsCollector(account) }, disableFunctionsCollector},
-		"iam":               {func(account *gcp.Account) prometheus.Collector { return collector.NewIAMCollector(account) }, disableIAMCollector},
-		"gke":               {func(account *gcp.Account) prometheus.Collector { return collector.NewGKECollector(account, *EnableExtendedMetricsGKECollector) }, disableGKECollector},
-		"logging":           {func(account *gcp.Account) prometheus.Collector { return collector.NewLoggingCollector(account) }, disableLoggingCollector},
-		"monitoring":        {func(account *gcp.Account) prometheus.Collector { return collector.NewMonitoringCollector(account) }, disableMonitoringCollector},
-		"scheduler":         {func(account *gcp.Account) prometheus.Collector { return collector.NewSchedulerCollector(account) }, disableSchedulerCollector},
-		"storage":           {func(account *gcp.Account) prometheus.Collector { return collector.NewStorageCollector(account) }, disableStorageCollector},
+		"artifact_registry": {func(account *gcp.Account) prometheus.Collector {
+			return collector.NewArtifactRegistryCollector(account)
+		}, disableArtifactRegistryCollector},
+		"cloud_run": {func(account *gcp.Account) prometheus.Collector { return collector.NewCloudRunCollector(account) }, disableCloudRunCollector},
+		"compute":   {func(account *gcp.Account) prometheus.Collector { return collector.NewComputeCollector(account) }, disableComputeCollector},
+		"endpoints": {func(account *gcp.Account) prometheus.Collector { return collector.NewEndpointsCollector(account) }, disableEndpointsCollector},
+		"eventarc":  {func(account *gcp.Account) prometheus.Collector { return collector.NewEventarcCollector(account) }, disableEventarcCollector},
+		"functions": {func(account *gcp.Account) prometheus.Collector { return collector.NewFunctionsCollector(account) }, disableFunctionsCollector},
+		"iam":       {func(account *gcp.Account) prometheus.Collector { return collector.NewIAMCollector(account) }, disableIAMCollector},
+		"gke": {func(account *gcp.Account) prometheus.Collector {
+			return collector.NewGKECollector(account, *enableExtendedMetricsGKECollector)
+		}, disableGKECollector},
+		"logging":    {func(account *gcp.Account) prometheus.Collector { return collector.NewLoggingCollector(account) }, disableLoggingCollector},
+		"monitoring": {func(account *gcp.Account) prometheus.Collector { return collector.NewMonitoringCollector(account) }, disableMonitoringCollector},
+		"scheduler":  {func(account *gcp.Account) prometheus.Collector { return collector.NewSchedulerCollector(account) }, disableSchedulerCollector},
+		"storage":    {func(account *gcp.Account) prometheus.Collector { return collector.NewStorageCollector(account) }, disableStorageCollector},
 	}
 
 	for name, config := range collectorConfigs {
