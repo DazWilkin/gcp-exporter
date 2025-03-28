@@ -4,6 +4,20 @@ on:
     branches:
       - master
 jobs:
+  golangci:
+    name: lint
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup
+        uses: actions/setup-go@v5
+        with:
+          go-version: stable
+      - name: golangci-lint
+        uses: golangci/golangci-lint-action@v7
+        with:
+          version: v2.0
   gcp-exporter:
     name: gcp-exporter
     runs-on: ubuntu-latest
