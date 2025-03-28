@@ -257,6 +257,10 @@ Usage of gcp-exporter:
       Disables the metrics collector for Cloud Logging
   --collector.monitoring.disable
       Disables the metrics collector for Cloud Monitoring
+  --collector.projects.extendedMetrics.enable
+      Enable the extended metrics for Google Project
+  --collector.projects.extendedMetrics.extraLabels string
+      Extra labels for Project Info, extracted from the label field of the Project object, with a label_ prefix added to each label name
   --collector.scheduler.disable
       Disables the metrics collector for Cloud Scheduler
   --collector.storage.disable
@@ -294,12 +298,14 @@ Please file issues
 |`gcp_compute_engine_instances`|Gauge|Number of instances|
 |`gcp_exporter_build_info`|Counter|A metric with a constant '1' value labeled by OS version, Go version, and the Git commit of the exporter|
 |`gcp_exporter_start_time`|Gauge|Exporter start time in Unix epoch seconds|
-|`gcp_iam_service_account_keys`|Gauge|Number of Service Account Keys|
-|`gcp_iam_service_accounts`|Gauge|Number of Service Accounts|
 |`gcp_gke_info`|Gauge|Exports detailed information from the Cluster Control Plane, including `id`, `mode`, `endpoint`, `network`, `subnetwork`, `initial_cluster_version`, and `node_pools_count`. 1 if the Cluster is running, 0 otherwise. Enabled when the `--collector.gke.extendedMetrics.enable` flag is set|
 |`gcp_gke_node_pools_info`|Gauge|Exports detailed information from the Cluster Node Pools, including `etag`, `cluster_id`, `autoscaling`, `disk_size_gb`, `disk_type`, `image_type`, `machine_type`, `locations`, `spot`, and `preemptible`. 1 if the Node Pool is running, 0 otherwise. Enabled when the `--collector.gke.extendedMetrics.enable` flag is set|
 |`gcp_gke_nodes`|Gauge|Number of nodes currently in the Cluster|
 |`gcp_gke_up`|Gauge|1 if the Cluster is running, 0 otherwise|
+|`gcp_iam_service_account_keys`|Gauge|Number of Service Account Keys|
+|`gcp_iam_service_accounts`|Gauge|Number of Service Accounts|
+|`gcp_projects_count`|Gauge|Number of projects in the `ACTIVE` lifecycle state|
+|`gcp_projects_info`|Gauge|Exports detailed information by project in the all lifecycle state. 1 if the lifecycle state is ACTIVE, 0 otherwise. Enabled when the `--collector.projects.extendedMetrics.enable` flag is set|
 |`gcp_storage_buckets`|Gauge|Number of buckets|
 
 ## Prometheus API
@@ -332,6 +338,7 @@ gcp_gke_cluster_node_pools_info
 gcp_gke_cluster_nodes
 gcp_gke_cluster_up
 gcp_projects_count
+gcp_projects_info
 gcp_storage_buckets
 ```
 
