@@ -27,25 +27,28 @@ var (
 )
 
 var (
-	filter      = flag.String("filter", "", "Filter the results of the request")
-	pagesize    = flag.Int64("max_projects", 10, "Maximum number of projects to include")
-	endpoint    = flag.String("endpoint", ":9402", "The endpoint of the HTTP server")
-	metricsPath = flag.String("path", "/metrics", "The path on which Prometheus metrics will be served")
+	filter			= flag.String("filter", "", "Filter the results of the request")
+	pagesize		= flag.Int64("max_projects", 10, "Maximum number of projects to include")
+	endpoint		= flag.String("endpoint", ":9402", "The endpoint of the HTTP server")
+	metricsPath	= flag.String("path", "/metrics", "The path on which Prometheus metrics will be served")
 
-	disableArtifactRegistryCollector = flag.Bool("collector.artifact_registry.disable", false, "Disables the metrics collector for the Artifact Registry")
-	disableCloudRunCollector         = flag.Bool("collector.cloud_run.disable", false, "Disables the metrics collector for Cloud Run")
-	disableComputeCollector          = flag.Bool("collector.compute.disable", false, "Disables the metrics collector for Compute Engine")
-	disableEndpointsCollector        = flag.Bool("collector.endpoints.disable", false, "Disables the metrics collector for Cloud Endpoints")
-	disableEventarcCollector         = flag.Bool("collector.eventarc.disable", false, "Disables the metrics collector for Cloud Eventarc")
-	disableFunctionsCollector        = flag.Bool("collector.functions.disable", false, "Disables the metrics collector for Cloud Functions")
-	disableIAMCollector              = flag.Bool("collector.iam.disable", false, "Disables the metrics collector for Cloud IAM")
-	disableGKECollector              = flag.Bool("collector.gke.disable", false, "Disables the metrics collector for Google Kubernetes Engine (GKE)")
-	disableLoggingCollector          = flag.Bool("collector.logging.disable", false, "Disables the metrics collector for Cloud Logging")
-	disableMonitoringCollector       = flag.Bool("collector.monitoring.disable", false, "Disables the metrics collector for Cloud Monitoring")
-	disableSchedulerCollector        = flag.Bool("collector.scheduler.disable", false, "Disables the metrics collector for Cloud Scheduler")
-	disableStorageCollector          = flag.Bool("collector.storage.disable", false, "Disables the metrics collector for Cloud Storage")
+	disableArtifactRegistryCollector	= flag.Bool("collector.artifact_registry.disable", false, "Disables the metrics collector for the Artifact Registry")
+	disableCloudRunCollector					= flag.Bool("collector.cloud_run.disable", false, "Disables the metrics collector for Cloud Run")
+	disableComputeCollector						= flag.Bool("collector.compute.disable", false, "Disables the metrics collector for Compute Engine")
+	disableEndpointsCollector					= flag.Bool("collector.endpoints.disable", false, "Disables the metrics collector for Cloud Endpoints")
+	disableEventarcCollector					= flag.Bool("collector.eventarc.disable", false, "Disables the metrics collector for Cloud Eventarc")
+	disableFunctionsCollector					= flag.Bool("collector.functions.disable", false, "Disables the metrics collector for Cloud Functions")
+	disableIAMCollector								= flag.Bool("collector.iam.disable", false, "Disables the metrics collector for Cloud IAM")
+	disableGKECollector								= flag.Bool("collector.gke.disable", false, "Disables the metrics collector for Google Kubernetes Engine (GKE)")
+	disableLoggingCollector						= flag.Bool("collector.logging.disable", false, "Disables the metrics collector for Cloud Logging")
+	disableMonitoringCollector				= flag.Bool("collector.monitoring.disable", false, "Disables the metrics collector for Cloud Monitoring")
+	disableSchedulerCollector					= flag.Bool("collector.scheduler.disable", false, "Disables the metrics collector for Cloud Scheduler")
+	disableStorageCollector						= flag.Bool("collector.storage.disable", false, "Disables the metrics collector for Cloud Storage")
 
 	enableExtendedMetricsGKECollector = flag.Bool("collector.gke.extendedMetrics.enable", false, "Enable the metrics collector for Google Kubernetes Engine (GKE) to collect ControlPlane and NodePool metrics")
+
+	enableExtendedMetricsProjectCollector = flag.Bool("collector.projects.extendedMetrics.enable", false, "Enable the extended metrics for Google Project")
+	projectsExtraLabelsInfo								= flag.String("collector.projects.extendedMetrics.extraLabels", "", "Extra labels for Project Info, extracted from the label field of the Project object, with a label_ prefix added to each label name")
 )
 
 const (
@@ -102,6 +105,10 @@ func main() {
 		log.Println("[main] OSVersion value unchanged: expected to be set during build")
 	}
 
+	if !*enableExtendedMetricsProjectCollector && *projectsExtraLabelsInfo != "" {
+		log.Println("[main] `--collector.projects.extendedMetrics.extraLabels` has no effect because `--collector.projects.extendedMetrics.enable=true`")
+	}
+
 	// Objects that holds GCP-specific resources (e.g. projects)
 	account := gcp.NewAccount()
 
@@ -111,11 +118,11 @@ func main() {
 	// ProjectCollector is a special case
 	// When it runs it replaces the Exporter's list of GCP projects
 	// The other collectors are dependent on this list of projects
-	registry.MustRegister(collector.NewProjectsCollector(account, *filter, *pagesize))
+	registry.MustRegister(collector.NewProjectsCollector(account, *filter, *pagesize, *enableExtendedMetricsProjectCollector, *projectsExtraLabelsInfo))
 
 	collectorConfigs := map[string]struct {
 		collector prometheus.Collector
-		disable   *bool
+		disable	 *bool
 	}{
 		"artifact_registry": {
 			collector.NewArtifactRegistryCollector(account),
@@ -140,7 +147,7 @@ func main() {
 		"functions": {
 			collector.NewFunctionsCollector(account),
 			disableFunctionsCollector,
-	      	},
+					},
 		"iam": {
 			collector.NewIAMCollector(account),
 			disableIAMCollector,
