@@ -153,9 +153,9 @@ func main() {
 		},
 		"gke": {
 			collector.NewGKECollector(account, collector.GKECollectorConfig{
-				*enableExtendedMetricsGKECollector,
-				*gkeExtraLabelsClusterInfo,
-				*gkeExtraLabelsNodePoolsInfo,
+				EnableExtendedMetrics:    *enableExtendedMetricsGKECollector,
+				ExtraLabelsClusterInfo:   *gkeExtraLabelsClusterInfo,
+				ExtraLabelsNodePoolsInfo: *gkeExtraLabelsNodePoolsInfo,
 			}),
 			disableGKECollector,
 		},
