@@ -45,9 +45,9 @@ var (
 	disableSchedulerCollector        = flag.Bool("collector.scheduler.disable", false, "Disables the metrics collector for Cloud Scheduler")
 	disableStorageCollector          = flag.Bool("collector.storage.disable", false, "Disables the metrics collector for Cloud Storage")
 
-	enableExtendedMetricsGKECollector 		 							= flag.Bool("collector.gke.extendedMetrics.enable", false, "Enable the metrics collector for Google Kubernetes Engine (GKE) to collect ControlPlane and NodePool metrics")
-	gkeExtraLabelsClusterInfo   = flag.String("collector.gke.extendedMetrics.extraLabelsClusterInfo", "", "Extra labels for Cluster Info in extended metrics, extracted from the ResourceLabels field of the Cluster object, with a label_ prefix added to each label name")
-	gkeExtraLabelsNodePoolsInfo = flag.String("collector.gke.extendedMetrics.extraLabelsNodePoolsInfo", "", "Extra labels for Node Pools Info in extended metrics, extracted from the ResourceLabels field of the Cluster.NodePools object, with a label_ prefix added to each label name")
+	enableExtendedMetricsGKECollector = flag.Bool("collector.gke.extendedMetrics.enable", false, "Enable the metrics collector for Google Kubernetes Engine (GKE) to collect Control Plane or NodePool metrics")
+	gkeExtraLabelsClusterInfo         = flag.String("collector.gke.extendedMetrics.extraLabelsClusterInfo", "", "Extra labels for Cluster Info in extended metrics, extracted from the ResourceLabels field of the Cluster object, with a label_ prefix added to each label name")
+	gkeExtraLabelsNodePoolsInfo       = flag.String("collector.gke.extendedMetrics.extraLabelsNodePoolsInfo", "", "Extra labels for Node Pools Info in extended metrics, extracted from the ResourceLabels field of the Cluster.NodePools object, with a label_ prefix added to each label name")
 )
 
 const (
@@ -96,7 +96,7 @@ func main() {
 	if *disableGKECollector {
 		if *enableExtendedMetricsGKECollector {
 			log.Println("[main] `--collector.gke.extendedMetrics.enable` has no effect because `--collector.gke.disable=true`")
-		} else if (*gkeExtraLabelsClusterInfo != "" || *gkeExtraLabelsNodePoolsInfo != "") {
+		} else if *gkeExtraLabelsClusterInfo != "" || *gkeExtraLabelsNodePoolsInfo != "" {
 			log.Println("[main] `--collector.gke.extendedMetrics.extraLabelsClusterInfo` and `--collector.gke.extendedMetrics.extraLabelsNodePoolsInfo` has no effect because `--collector.gke.extendedMetrics.enable=true`")
 		}
 	}
@@ -146,13 +146,17 @@ func main() {
 		"functions": {
 			collector.NewFunctionsCollector(account),
 			disableFunctionsCollector,
-	      	},
+		},
 		"iam": {
 			collector.NewIAMCollector(account),
 			disableIAMCollector,
 		},
 		"gke": {
-			collector.NewGKECollector(account, *enableExtendedMetricsGKECollector, *gkeExtraLabelsClusterInfo, *gkeExtraLabelsNodePoolsInfo),
+			collector.NewGKECollector(account, collector.GKECollectorConfig{
+				*enableExtendedMetricsGKECollector,
+				*gkeExtraLabelsClusterInfo,
+				*gkeExtraLabelsNodePoolsInfo,
+			}),
 			disableGKECollector,
 		},
 		"logging": {

@@ -10,18 +10,25 @@ import (
 	"sync"
 
 	"github.com/DazWilkin/gcp-exporter/gcp"
+	"github.com/DazWilkin/gcp-exporter/internal"
 	"github.com/prometheus/client_golang/prometheus"
 	"google.golang.org/api/cloudresourcemanager/v1"
 	"google.golang.org/api/container/v1"
 	"google.golang.org/api/googleapi"
 )
 
+type GKECollectorConfig struct {
+	EnableExtendedMetrics    bool
+	ExtraLabelsClusterInfo   string
+	ExtraLabelsNodePoolsInfo string
+}
+
 // GKECollector collects GKE cluster metrics
 type GKECollector struct {
-	account                         *gcp.Account
-	enableExtendedMetrics           bool
-	extraLabelsClusterInfoExtended  ExtraLabel
-	extraLabelsNodePoolsInfoExtended ExtraLabel
+	account                          *gcp.Account
+	enableExtendedMetrics            bool
+	extraLabelsClusterInfoExtended   internal.ExtraLabel
+	extraLabelsNodePoolsInfoExtended internal.ExtraLabel
 
 	info          *prometheus.Desc
 	nodePoolsInfo *prometheus.Desc
@@ -30,19 +37,34 @@ type GKECollector struct {
 }
 
 // NewGKECollector initializes the GKE collector
-func NewGKECollector(account *gcp.Account, enableExtendedMetrics bool, extraLabelsClusterInfo string, extraLabelsNodePoolsInfo string) *GKECollector {
+func NewGKECollector(account *gcp.Account, config GKECollectorConfig) *GKECollector {
 	fqName := name("gke")
 	labelKeys := []string{"project", "name", "location", "version"}
 
-	// Process the extra labels once
-	extraLabelsClusterInfoMap := ProcessExtraLabels(extraLabelsClusterInfo)
-	extraLabelsNodePoolsInfoMap := ProcessExtraLabels(extraLabelsNodePoolsInfo)
+	// Initialize extra labels with order preservation
+	var extraLabelsClusterInfo internal.ExtraLabel
+	var extraLabelsNodePoolsInfo internal.ExtraLabel
+
+	infoLabelKeys := append(labelKeys, []string{"id", "mode", "endpoint", "network", "subnetwork",
+		"initial_cluster_version", "node_pools_count"}...)
+	nodePoolsInfoLabelKeys := append(labelKeys, []string{"etag", "cluster_id", "autoscaling", "disk_size_gb",
+		"disk_type", "image_type", "machine_type", "locations", "spot", "preemptible"}...)
+
+	if len(config.ExtraLabelsClusterInfo) > 0 {
+		extraLabelsClusterInfo = internal.ProcessExtraLabels(config.ExtraLabelsClusterInfo)
+		infoLabelKeys = append(infoLabelKeys, internal.GetLabelNamesFromExtraLabels(extraLabelsClusterInfo)...)
+	}
+
+	if len(config.ExtraLabelsNodePoolsInfo) > 0 {
+		extraLabelsNodePoolsInfo = internal.ProcessExtraLabels(config.ExtraLabelsNodePoolsInfo)
+		nodePoolsInfoLabelKeys = append(nodePoolsInfoLabelKeys, internal.GetLabelNamesFromExtraLabels(extraLabelsNodePoolsInfo)...)
+	}
 
 	return &GKECollector{
-		account:                         account,
-		enableExtendedMetrics:           enableExtendedMetrics,
-		extraLabelsClusterInfoExtended:  extraLabelsClusterInfoMap,
-		extraLabelsNodePoolsInfoExtended: extraLabelsNodePoolsInfoMap,
+		account:                          account,
+		enableExtendedMetrics:            config.EnableExtendedMetrics,
+		extraLabelsClusterInfoExtended:   extraLabelsClusterInfo,
+		extraLabelsNodePoolsInfoExtended: extraLabelsNodePoolsInfo,
 
 		up: prometheus.NewDesc(
 			fqName("up"),
@@ -52,8 +74,7 @@ func NewGKECollector(account *gcp.Account, enableExtendedMetrics bool, extraLabe
 		info: prometheus.NewDesc(
 			fqName("info"),
 			"Cluster control plane information. 1 if the cluster is running, 0 otherwise",
-			append(labelKeys, append([]string{"id", "mode", "endpoint", "network", "subnetwork",
-				"initial_cluster_version", "node_pools_count"}, GetLabelNamesFromExtraLabels(extraLabelsClusterInfoMap)...)...),
+			infoLabelKeys,
 			nil,
 		),
 		nodes: prometheus.NewDesc(
@@ -64,8 +85,7 @@ func NewGKECollector(account *gcp.Account, enableExtendedMetrics bool, extraLabe
 		nodePoolsInfo: prometheus.NewDesc(
 			fqName("node_pools_info"),
 			"Cluster Node Pools Information. 1 if the Node Pool is running, 0 otherwise",
-			append(labelKeys, append([]string{"etag", "cluster_id", "autoscaling", "disk_size_gb",
-				"disk_type", "image_type", "machine_type", "locations", "spot", "preemptible"}, GetLabelNamesFromExtraLabels(extraLabelsNodePoolsInfoMap)...)...),
+			nodePoolsInfoLabelKeys,
 			nil,
 		),
 	}
@@ -159,7 +179,7 @@ func (c *GKECollector) collectExtendedMetrics(p *cloudresourcemanager.Project, c
 	}
 
 	// Add the extra labels to cluster info
-	labelValuesClusterInfo = append(labelValuesClusterInfo, GetExtraLabelsValues(cluster.ResourceLabels, c.extraLabelsClusterInfoExtended)...)
+	labelValuesClusterInfo = append(labelValuesClusterInfo, internal.GetExtraLabelsValues(cluster.ResourceLabels, c.extraLabelsClusterInfoExtended)...)
 
 	// Collect the extended metrics for the cluster
 	ch <- prometheus.MustNewConstMetric(c.info, prometheus.GaugeValue, clusterStatus, labelValuesClusterInfo...)
@@ -183,7 +203,7 @@ func (c *GKECollector) collectExtendedMetrics(p *cloudresourcemanager.Project, c
 			boolToString(nodePoolConfigSpec.Preemptible),
 		}
 		// Add the extra labels to node pool info
-		labelValuesNodePoolInfo = append(labelValuesNodePoolInfo, GetExtraLabelsValues(nodePoolConfigSpec.ResourceLabels, c.extraLabelsNodePoolsInfoExtended)...)
+		labelValuesNodePoolInfo = append(labelValuesNodePoolInfo, internal.GetExtraLabelsValues(nodePoolConfigSpec.ResourceLabels, c.extraLabelsNodePoolsInfoExtended)...)
 
 		// Collect the extended metrics for the node pool
 		ch <- prometheus.MustNewConstMetric(c.nodePoolsInfo, prometheus.GaugeValue, nodePoolStatus, labelValuesNodePoolInfo...)
