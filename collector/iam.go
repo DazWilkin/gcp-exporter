@@ -76,7 +76,7 @@ func (c *IAMCollector) Collect(ch chan<- prometheus.Metric) {
 		wg.Add(1)
 		go func(p *cloudresourcemanager.Project) {
 			defer wg.Done()
-			log.Printf("IAMCollector:go] Project: %s", p.ProjectId)
+			log.Printf("[IAMCollector:go] Project: %s", p.ProjectId)
 			parent := fmt.Sprintf("projects/%s", p.ProjectId)
 			resp, err := iamService.Projects.ServiceAccounts.List(parent).Context(ctx).Do()
 			if err != nil {
@@ -95,7 +95,7 @@ func (c *IAMCollector) Collect(ch chan<- prometheus.Metric) {
 			}
 
 			for _, account := range resp.Accounts {
-				log.Printf("IAMCollector:go] ServiceAccount: %s", account.Name)
+				log.Printf("[IAMCollector:go] ServiceAccount: %s", account.Name)
 
 				// Record Service Account metrics
 				ch <- prometheus.MustNewConstMetric(

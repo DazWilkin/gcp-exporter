@@ -45,7 +45,9 @@ var (
 	disableSchedulerCollector        = flag.Bool("collector.scheduler.disable", false, "Disables the metrics collector for Cloud Scheduler")
 	disableStorageCollector          = flag.Bool("collector.storage.disable", false, "Disables the metrics collector for Cloud Storage")
 
-	enableExtendedMetricsGKECollector = flag.Bool("collector.gke.extendedMetrics.enable", false, "Enable the metrics collector for Google Kubernetes Engine (GKE) to collect ControlPlane and NodePool metrics")
+	enableExtendedMetricsGKECollector = flag.Bool("collector.gke.extendedMetrics.enable", false, "Enable the metrics collector for Google Kubernetes Engine (GKE) to collect Control Plane or NodePool metrics")
+	gkeExtraLabelsClusterInfo         = flag.String("collector.gke.extendedMetrics.extraLabelsClusterInfo", "", "Extra labels for Cluster Info in extended metrics, extracted from the ResourceLabels field of the Cluster object, with a label_ prefix added to each label name")
+	gkeExtraLabelsNodePoolsInfo       = flag.String("collector.gke.extendedMetrics.extraLabelsNodePoolsInfo", "", "Extra labels for Node Pools Info in extended metrics, extracted from the ResourceLabels field of the Cluster.NodePools object, with a label_ prefix added to each label name")
 )
 
 const (
@@ -91,8 +93,18 @@ func handleRoot(w http.ResponseWriter, _ *http.Request) {
 func main() {
 	flag.Parse()
 
-	if *disableGKECollector && *enableExtendedMetricsGKECollector {
-		log.Println("[main] `--enabledExtendedMetricsGKECollector` has no effect because `--disableGKECollector=true`")
+	if *disableGKECollector {
+		// GKE Collector is disabled, extended metrics cannot be enabled
+		if *enableExtendedMetricsGKECollector {
+			log.Println("[main] `--collector.gke.extendedMetrics.enable` has no effect because `--collector.gke.disable=true`")
+		}
+	}	else {
+		// GKE Collector is enabled, extended metrics are disabled, cannot enable extra labels
+		if !*enableExtendedMetricsGKECollector {
+			if *gkeExtraLabelsClusterInfo != "" || *gkeExtraLabelsNodePoolsInfo != "" {
+				log.Println("[main] `--collector.gke.extendedMetrics.extraLabelsClusterInfo` and `--collector.gke.extendedMetrics.extraLabelsNodePoolsInfo` has no effect because `--collector.gke.extendedMetrics.enable=false`")
+			}
+		}
 	}
 
 	if GitCommit == "" {
@@ -140,13 +152,17 @@ func main() {
 		"functions": {
 			collector.NewFunctionsCollector(account),
 			disableFunctionsCollector,
-	      	},
+		},
 		"iam": {
 			collector.NewIAMCollector(account),
 			disableIAMCollector,
 		},
 		"gke": {
-			collector.NewGKECollector(account, *enableExtendedMetricsGKECollector),
+			collector.NewGKECollector(account, collector.GKECollectorConfig{
+				EnableExtendedMetrics:    *enableExtendedMetricsGKECollector,
+				ExtraLabelsClusterInfo:   *gkeExtraLabelsClusterInfo,
+				ExtraLabelsNodePoolsInfo: *gkeExtraLabelsNodePoolsInfo,
+			}),
 			disableGKECollector,
 		},
 		"logging": {

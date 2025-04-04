@@ -10,16 +10,25 @@ import (
 	"sync"
 
 	"github.com/DazWilkin/gcp-exporter/gcp"
+	"github.com/DazWilkin/gcp-exporter/internal"
 	"github.com/prometheus/client_golang/prometheus"
-
 	"google.golang.org/api/cloudresourcemanager/v1"
 	"google.golang.org/api/container/v1"
 	"google.golang.org/api/googleapi"
 )
 
+type GKECollectorConfig struct {
+	EnableExtendedMetrics    bool
+	ExtraLabelsClusterInfo   string
+	ExtraLabelsNodePoolsInfo string
+}
+
+// GKECollector collects GKE cluster metrics
 type GKECollector struct {
-	account               *gcp.Account
-	enableExtendedMetrics bool
+	account                          *gcp.Account
+	enableExtendedMetrics            bool
+	extraLabelsClusterInfoExtended   internal.ExtraLabel
+	extraLabelsNodePoolsInfoExtended internal.ExtraLabel
 
 	Info          *prometheus.Desc
 	NodePoolsInfo *prometheus.Desc
@@ -27,13 +36,34 @@ type GKECollector struct {
 	Up            *prometheus.Desc
 }
 
-func NewGKECollector(account *gcp.Account, enableExtendedMetrics bool) *GKECollector {
+// NewGKECollector initializes the GKE collector
+func NewGKECollector(account *gcp.Account, config GKECollectorConfig) *GKECollector {
 	fqName := name("gke")
 	labelKeys := []string{"project", "name", "location", "version"}
 
+	// Initialize extra labels with order preservation
+	var extraLabelsClusterInfo internal.ExtraLabel
+	var extraLabelsNodePoolsInfo internal.ExtraLabel
+
+	infoLabelKeys := append(labelKeys, []string{"mode", "network", "subnetwork", "node_pools_count"}...)
+	nodePoolsInfoLabelKeys := append(labelKeys, []string{"cluster_name", "autoscaling", "disk_size_gb",
+		"disk_type", "image_type", "machine_type", "spot", "preemptible"}...)
+
+	if len(config.ExtraLabelsClusterInfo) > 0 {
+		extraLabelsClusterInfo = internal.ProcessExtraLabels(config.ExtraLabelsClusterInfo)
+		infoLabelKeys = append(infoLabelKeys, internal.GetLabelNamesFromExtraLabels(extraLabelsClusterInfo)...)
+	}
+
+	if len(config.ExtraLabelsNodePoolsInfo) > 0 {
+		extraLabelsNodePoolsInfo = internal.ProcessExtraLabels(config.ExtraLabelsNodePoolsInfo)
+		nodePoolsInfoLabelKeys = append(nodePoolsInfoLabelKeys, internal.GetLabelNamesFromExtraLabels(extraLabelsNodePoolsInfo)...)
+	}
+
 	return &GKECollector{
-		account:               account,
-		enableExtendedMetrics: enableExtendedMetrics,
+		account:                          account,
+		enableExtendedMetrics:            config.EnableExtendedMetrics,
+		extraLabelsClusterInfoExtended:   extraLabelsClusterInfo,
+		extraLabelsNodePoolsInfoExtended: extraLabelsNodePoolsInfo,
 
 		Up: prometheus.NewDesc(
 			fqName("up"),
@@ -43,8 +73,7 @@ func NewGKECollector(account *gcp.Account, enableExtendedMetrics bool) *GKEColle
 		Info: prometheus.NewDesc(
 			fqName("info"),
 			"Cluster control plane information. 1 if the cluster is running, 0 otherwise",
-			append(labelKeys, "id", "mode", "endpoint", "network", "subnetwork",
-				"initial_cluster_version", "node_pools_count"),
+			infoLabelKeys,
 			nil,
 		),
 		Nodes: prometheus.NewDesc(
@@ -55,13 +84,13 @@ func NewGKECollector(account *gcp.Account, enableExtendedMetrics bool) *GKEColle
 		NodePoolsInfo: prometheus.NewDesc(
 			fqName("node_pools_info"),
 			"Cluster Node Pools Information. 1 if the Node Pool is running, 0 otherwise",
-			append(labelKeys, "etag", "cluster_id", "autoscaling", "disk_size_gb",
-				"disk_type", "image_type", "machine_type", "locations", "spot", "preemptible"),
+			nodePoolsInfoLabelKeys,
 			nil,
 		),
 	}
 }
 
+// Collect fetches metrics from GKE clusters and pushes them to the Prometheus channel
 func (c *GKECollector) Collect(ch chan<- prometheus.Metric) {
 	ctx := context.Background()
 	containerService, err := container.NewService(ctx)
@@ -81,6 +110,7 @@ func (c *GKECollector) Collect(ch chan<- prometheus.Metric) {
 	wg.Wait()
 }
 
+// collectProjectMetrics collects metrics for each project
 func (c *GKECollector) collectProjectMetrics(ctx context.Context, containerService *container.Service,
 	p *cloudresourcemanager.Project, ch chan<- prometheus.Metric) {
 
@@ -102,6 +132,7 @@ func (c *GKECollector) collectProjectMetrics(ctx context.Context, containerServi
 	}
 }
 
+// collectClusterMetrics collects metrics for each cluster
 func (c *GKECollector) collectClusterMetrics(p *cloudresourcemanager.Project, cluster *container.Cluster,
 	ch chan<- prometheus.Metric) {
 
@@ -112,17 +143,20 @@ func (c *GKECollector) collectClusterMetrics(p *cloudresourcemanager.Project, cl
 		clusterStatus = 1.0
 	}
 
+	// Collect the base metrics
 	ch <- prometheus.MustNewConstMetric(c.Up, prometheus.GaugeValue, clusterStatus,
 		p.ProjectId, cluster.Name, cluster.Location, cluster.CurrentMasterVersion)
 
 	ch <- prometheus.MustNewConstMetric(c.Nodes, prometheus.GaugeValue, float64(cluster.CurrentNodeCount),
 		p.ProjectId, cluster.Name, cluster.Location, cluster.CurrentNodeVersion)
 
+	// Collect extended metrics if enabled
 	if c.enableExtendedMetrics {
 		c.collectExtendedMetrics(p, cluster, ch, clusterStatus)
 	}
 }
 
+// collectExtendedMetrics collects the extended metrics for each cluster, including extra labels
 func (c *GKECollector) collectExtendedMetrics(p *cloudresourcemanager.Project, cluster *container.Cluster,
 	ch chan<- prometheus.Metric, clusterStatus float64) {
 
@@ -137,10 +171,16 @@ func (c *GKECollector) collectExtendedMetrics(p *cloudresourcemanager.Project, c
 		clusterMode = "Autopilot"
 	}
 
-	ch <- prometheus.MustNewConstMetric(c.Info, prometheus.GaugeValue, clusterStatus,
+	labelValuesClusterInfo := []string{
 		p.ProjectId, cluster.Name, cluster.Location, cluster.CurrentMasterVersion,
-		cluster.Id, clusterMode, cluster.Endpoint, cluster.Network, cluster.Subnetwork,
-		cluster.InitialClusterVersion, nodePoolsSize)
+		clusterMode, cluster.Network, cluster.Subnetwork, nodePoolsSize,
+	}
+
+	// Add the extra labels to cluster info
+	labelValuesClusterInfo = append(labelValuesClusterInfo, internal.GetExtraLabelsValues(cluster.ResourceLabels, c.extraLabelsClusterInfoExtended)...)
+
+	// Collect the extended metrics for the cluster
+	ch <- prometheus.MustNewConstMetric(c.Info, prometheus.GaugeValue, clusterStatus, labelValuesClusterInfo...)
 
 	for _, nodePool := range cluster.NodePools {
 		nodePoolStatus := 0.0
@@ -148,19 +188,24 @@ func (c *GKECollector) collectExtendedMetrics(p *cloudresourcemanager.Project, c
 			nodePoolStatus = 1.0
 		}
 
+		nodePoolConfigSpec := nodePool.Config
 		boolToString := func(b bool) string { return strconv.FormatBool(b) }
 
-		ch <- prometheus.MustNewConstMetric(c.NodePoolsInfo, prometheus.GaugeValue, nodePoolStatus,
-			p.ProjectId, nodePool.Name, cluster.Location, nodePool.Version, nodePool.Etag, cluster.Id,
-			boolToString(nodePool.Autoscaling.Enabled),
-			strconv.FormatInt(nodePool.Config.DiskSizeGb, 10), nodePool.Config.DiskType,
-			nodePool.Config.ImageType, nodePool.Config.MachineType,
-			strings.Join(nodePool.Locations, ","),
-			boolToString(nodePool.Config.Spot),
-			boolToString(nodePool.Config.Preemptible))
+		labelValuesNodePoolInfo := []string{
+			p.ProjectId, nodePool.Name, cluster.Location, nodePool.Version, cluster.Name,
+			boolToString(nodePool.Autoscaling.Enabled), strconv.FormatInt(nodePoolConfigSpec.DiskSizeGb, 10),
+			nodePoolConfigSpec.DiskType, nodePoolConfigSpec.ImageType, nodePoolConfigSpec.MachineType,
+			boolToString(nodePoolConfigSpec.Spot), boolToString(nodePoolConfigSpec.Preemptible),
+		}
+		// Add the extra labels to node pool info
+		labelValuesNodePoolInfo = append(labelValuesNodePoolInfo, internal.GetExtraLabelsValues(nodePoolConfigSpec.ResourceLabels, c.extraLabelsNodePoolsInfoExtended)...)
+
+		// Collect the extended metrics for the node pool
+		ch <- prometheus.MustNewConstMetric(c.NodePoolsInfo, prometheus.GaugeValue, nodePoolStatus, labelValuesNodePoolInfo...)
 	}
 }
 
+// Describe registers the metrics descriptions
 func (c *GKECollector) Describe(ch chan<- *prometheus.Desc) {
 	ch <- c.Info
 	ch <- c.NodePoolsInfo
