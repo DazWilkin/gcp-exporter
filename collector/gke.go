@@ -45,10 +45,9 @@ func NewGKECollector(account *gcp.Account, config GKECollectorConfig) *GKECollec
 	var extraLabelsClusterInfo internal.ExtraLabel
 	var extraLabelsNodePoolsInfo internal.ExtraLabel
 
-	infoLabelKeys := append(labelKeys, []string{"id", "mode", "endpoint", "network", "subnetwork",
-		"initial_cluster_version", "node_pools_count"}...)
-	nodePoolsInfoLabelKeys := append(labelKeys, []string{"etag", "cluster_id", "autoscaling", "disk_size_gb",
-		"disk_type", "image_type", "machine_type", "locations", "spot", "preemptible"}...)
+	infoLabelKeys := append(labelKeys, []string{"mode", "network", "subnetwork", "node_pools_count"}...)
+	nodePoolsInfoLabelKeys := append(labelKeys, []string{"cluster_name", "autoscaling", "disk_size_gb",
+		"disk_type", "image_type", "machine_type", "spot", "preemptible"}...)
 
 	if len(config.ExtraLabelsClusterInfo) > 0 {
 		extraLabelsClusterInfo = internal.ProcessExtraLabels(config.ExtraLabelsClusterInfo)
@@ -174,8 +173,7 @@ func (c *GKECollector) collectExtendedMetrics(p *cloudresourcemanager.Project, c
 
 	labelValuesClusterInfo := []string{
 		p.ProjectId, cluster.Name, cluster.Location, cluster.CurrentMasterVersion,
-		cluster.Id, clusterMode, cluster.Endpoint, cluster.Network, cluster.Subnetwork,
-		cluster.InitialClusterVersion, nodePoolsSize,
+		clusterMode, cluster.Network, cluster.Subnetwork, nodePoolsSize,
 	}
 
 	// Add the extra labels to cluster info
@@ -194,13 +192,10 @@ func (c *GKECollector) collectExtendedMetrics(p *cloudresourcemanager.Project, c
 		boolToString := func(b bool) string { return strconv.FormatBool(b) }
 
 		labelValuesNodePoolInfo := []string{
-			p.ProjectId, nodePool.Name, cluster.Location, nodePool.Version, nodePool.Etag, cluster.Id,
-			boolToString(nodePool.Autoscaling.Enabled),
-			strconv.FormatInt(nodePoolConfigSpec.DiskSizeGb, 10), nodePoolConfigSpec.DiskType,
-			nodePoolConfigSpec.ImageType, nodePoolConfigSpec.MachineType,
-			strings.Join(nodePool.Locations, ","),
-			boolToString(nodePoolConfigSpec.Spot),
-			boolToString(nodePoolConfigSpec.Preemptible),
+			p.ProjectId, nodePool.Name, cluster.Location, nodePool.Version, cluster.Name,
+			boolToString(nodePool.Autoscaling.Enabled), strconv.FormatInt(nodePoolConfigSpec.DiskSizeGb, 10),
+			nodePoolConfigSpec.DiskType, nodePoolConfigSpec.ImageType, nodePoolConfigSpec.MachineType,
+			boolToString(nodePoolConfigSpec.Spot), boolToString(nodePoolConfigSpec.Preemptible),
 		}
 		// Add the extra labels to node pool info
 		labelValuesNodePoolInfo = append(labelValuesNodePoolInfo, internal.GetExtraLabelsValues(nodePoolConfigSpec.ResourceLabels, c.extraLabelsNodePoolsInfoExtended)...)

@@ -94,10 +94,16 @@ func main() {
 	flag.Parse()
 
 	if *disableGKECollector {
+		// GKE Collector is disabled, extended metrics cannot be enabled
 		if *enableExtendedMetricsGKECollector {
 			log.Println("[main] `--collector.gke.extendedMetrics.enable` has no effect because `--collector.gke.disable=true`")
-		} else if *gkeExtraLabelsClusterInfo != "" || *gkeExtraLabelsNodePoolsInfo != "" {
-			log.Println("[main] `--collector.gke.extendedMetrics.extraLabelsClusterInfo` and `--collector.gke.extendedMetrics.extraLabelsNodePoolsInfo` has no effect because `--collector.gke.extendedMetrics.enable=true`")
+		}
+	}	else {
+		// GKE Collector is enabled, extended metrics are disabled, cannot enable extra labels
+		if !*enableExtendedMetricsGKECollector {
+			if *gkeExtraLabelsClusterInfo != "" || *gkeExtraLabelsNodePoolsInfo != "" {
+				log.Println("[main] `--collector.gke.extendedMetrics.extraLabelsClusterInfo` and `--collector.gke.extendedMetrics.extraLabelsNodePoolsInfo` has no effect because `--collector.gke.extendedMetrics.enable=false`")
+			}
 		}
 	}
 
