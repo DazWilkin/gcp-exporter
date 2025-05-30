@@ -5,6 +5,7 @@ import (
 	"html/template"
 	"log"
 	"net/http"
+	_ "net/http/pprof"
 	"runtime"
 	"time"
 
@@ -31,6 +32,9 @@ var (
 	pagesize    = flag.Int64("max_projects", 10, "Maximum number of projects to include")
 	endpoint    = flag.String("endpoint", ":9402", "The endpoint of the HTTP server")
 	metricsPath = flag.String("path", "/metrics", "The path on which Prometheus metrics will be served")
+
+	profilingEnabled  = flag.Bool("profiling_enabled", false, "Enable profiling endpoint")
+	profilingEndpoint = flag.String("profiling_endpoint", ":6060", "The endpoint of the profiling server")
 
 	disableArtifactRegistryCollector = flag.Bool("collector.artifact_registry.disable", false, "Disables the metrics collector for the Artifact Registry")
 	disableCloudRunCollector         = flag.Bool("collector.cloud_run.disable", false, "Disables the metrics collector for Cloud Run")
@@ -102,6 +106,14 @@ func main() {
 		log.Println("[main] OSVersion value unchanged: expected to be set during build")
 	}
 
+	// Profiling
+	if *profilingEnabled {
+		go func() {
+			log.Printf("[main] Profiling server starting (%s)", *profilingEndpoint)
+			log.Fatal(http.ListenAndServe(*profilingEndpoint, nil))
+		}()
+	}
+
 	// Objects that holds GCP-specific resources (e.g. projects)
 	account := gcp.NewAccount()
 
@@ -140,7 +152,7 @@ func main() {
 		"functions": {
 			collector.NewFunctionsCollector(account),
 			disableFunctionsCollector,
-	      	},
+		},
 		"iam": {
 			collector.NewIAMCollector(account),
 			disableIAMCollector,
