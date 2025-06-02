@@ -22,7 +22,8 @@ var (
 
 // ArtifactRegistryCollector represents an Artifact Registry
 type ArtifactRegistryCollector struct {
-	account *gcp.Account
+	account                 *gcp.Account
+	artifactregistryService *artifactregistry.Service
 
 	Registries *prometheus.Desc
 	Locations  *prometheus.Desc
@@ -32,8 +33,17 @@ type ArtifactRegistryCollector struct {
 // NewArtifactRegistryCollector returns a new ArtifactRegistryCollector
 func NewArtifactRegistryCollector(account *gcp.Account) *ArtifactRegistryCollector {
 	fqName := name("artifact_registry")
+
+	ctx := context.Background()
+	artifactregistryService, err := artifactregistry.NewService(ctx)
+	if err != nil {
+		log.Println(err)
+		return nil
+	}
+
 	return &ArtifactRegistryCollector{
-		account: account,
+		account:                 account,
+		artifactregistryService: artifactregistryService,
 
 		Registries: prometheus.NewDesc(
 			fqName("registries"),
@@ -66,13 +76,6 @@ func NewArtifactRegistryCollector(account *gcp.Account) *ArtifactRegistryCollect
 
 // Collect implements Prometheus' Collector interface and is used to collect metrics
 func (c *ArtifactRegistryCollector) Collect(ch chan<- prometheus.Metric) {
-	ctx := context.Background()
-	artifactregistryService, err := artifactregistry.NewService(ctx)
-	if err != nil {
-		log.Println(err)
-		return
-	}
-
 	// Enumerate all of the projects
 	var wg sync.WaitGroup
 	for _, p := range c.account.Projects {
@@ -81,7 +84,7 @@ func (c *ArtifactRegistryCollector) Collect(ch chan<- prometheus.Metric) {
 			defer wg.Done()
 			log.Printf("[ArtifactRegistryCollector] Project: %s", p.ProjectId)
 			name := fmt.Sprintf("projects/%s", p.ProjectId)
-			rqst := artifactregistryService.Projects.Locations.List(name)
+			rqst := c.artifactregistryService.Projects.Locations.List(name)
 			resp, err := rqst.Do()
 			if err != nil {
 				if e, ok := err.(*googleapi.Error); ok {
@@ -107,7 +110,7 @@ func (c *ArtifactRegistryCollector) Collect(ch chan<- prometheus.Metric) {
 			for _, l := range resp.Locations {
 				// LocationID is the short form e.g. "us-west1"
 				parent := fmt.Sprintf("projects/%s/locations/%s", p.ProjectId, l.LocationId)
-				rqst := artifactregistryService.Projects.Locations.Repositories.List(parent)
+				rqst := c.artifactregistryService.Projects.Locations.Repositories.List(parent)
 
 				for {
 					resp, err := rqst.Do()

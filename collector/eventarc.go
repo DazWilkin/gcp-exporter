@@ -15,7 +15,8 @@ import (
 
 // EventarcCollector represents EventArc
 type EventarcCollector struct {
-	account *gcp.Account
+	account         *gcp.Account
+	eventarcService *eventarc.Service
 
 	Channels *prometheus.Desc
 	Triggers *prometheus.Desc
@@ -24,8 +25,17 @@ type EventarcCollector struct {
 // NewEventarcCollector creates a new EventarcCollector
 func NewEventarcCollector(account *gcp.Account) *EventarcCollector {
 	fqName := name("eventarc")
+
+	ctx := context.Background()
+	eventarcService, err := eventarc.NewService(ctx)
+	if err != nil {
+		log.Println(err)
+		return nil
+	}
+
 	return &EventarcCollector{
-		account: account,
+		account:         account,
+		eventarcService: eventarcService,
 
 		Channels: prometheus.NewDesc(
 			fqName("channels"),
@@ -56,13 +66,6 @@ func NewEventarcCollector(account *gcp.Account) *EventarcCollector {
 
 // Collect implements Prometheus' Collector interface and is used to collect metrics
 func (c *EventarcCollector) Collect(ch chan<- prometheus.Metric) {
-	ctx := context.Background()
-	eventarcService, err := eventarc.NewService(ctx)
-	if err != nil {
-		log.Println(err)
-		return
-	}
-
 	// Enumerate all of the projects
 	var wg sync.WaitGroup
 	for _, p := range c.account.Projects {
@@ -74,7 +77,7 @@ func (c *EventarcCollector) Collect(ch chan<- prometheus.Metric) {
 		go func() {
 			defer wg.Done()
 
-			rqst := eventarcService.Projects.Locations.Channels.List(parent)
+			rqst := c.eventarcService.Projects.Locations.Channels.List(parent)
 			resp, err := rqst.Do()
 			if err != nil {
 				if e, ok := err.(*googleapi.Error); ok {
@@ -113,7 +116,7 @@ func (c *EventarcCollector) Collect(ch chan<- prometheus.Metric) {
 		go func() {
 			defer wg.Done()
 
-			rqst := eventarcService.Projects.Locations.Triggers.List(parent)
+			rqst := c.eventarcService.Projects.Locations.Triggers.List(parent)
 			resp, err := rqst.Do()
 			if err != nil {
 				if e, ok := err.(*googleapi.Error); ok {

@@ -22,7 +22,8 @@ var (
 
 // FunctionsCollector represents Cloud Functions
 type FunctionsCollector struct {
-	account *gcp.Account
+	account               *gcp.Account
+	cloudfunctionsService *cloudfunctions.Service
 
 	Functions *prometheus.Desc
 	Locations *prometheus.Desc
@@ -32,8 +33,17 @@ type FunctionsCollector struct {
 // NewFunctionsCollector returns a new FunctionsCollector
 func NewFunctionsCollector(account *gcp.Account) *FunctionsCollector {
 	fqName := name("cloud_functions")
+
+	ctx := context.Background()
+	cloudfunctionsService, err := cloudfunctions.NewService(ctx)
+	if err != nil {
+		log.Println(err)
+		return nil
+	}
+
 	return &FunctionsCollector{
-		account: account,
+		account:               account,
+		cloudfunctionsService: cloudfunctionsService,
 
 		Functions: prometheus.NewDesc(
 			fqName("functions"),
@@ -66,13 +76,6 @@ func NewFunctionsCollector(account *gcp.Account) *FunctionsCollector {
 
 // Collect implements Prometheus' Collector interface and is used to collect metrics
 func (c *FunctionsCollector) Collect(ch chan<- prometheus.Metric) {
-	ctx := context.Background()
-	cloudfunctionsservice, err := cloudfunctions.NewService(ctx)
-	if err != nil {
-		log.Println(err)
-		return
-	}
-
 	// Enumerate all of the projects
 	var wg sync.WaitGroup
 	for _, p := range c.account.Projects {
@@ -81,7 +84,7 @@ func (c *FunctionsCollector) Collect(ch chan<- prometheus.Metric) {
 			defer wg.Done()
 			log.Printf("[CloudFunctionsCollector] Project: %s", p.ProjectId)
 			parent := fmt.Sprintf("projects/%s/locations/-", p.ProjectId)
-			rqst := cloudfunctionsservice.Projects.Locations.Functions.List(parent)
+			rqst := c.cloudfunctionsService.Projects.Locations.Functions.List(parent)
 
 			functions := 0
 			locations := make(map[string]int)

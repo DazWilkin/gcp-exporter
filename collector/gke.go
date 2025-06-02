@@ -18,7 +18,9 @@ import (
 )
 
 type GKECollector struct {
-	account               *gcp.Account
+	account          *gcp.Account
+	containerService *container.Service
+
 	enableExtendedMetrics bool
 
 	Info          *prometheus.Desc
@@ -31,8 +33,17 @@ func NewGKECollector(account *gcp.Account, enableExtendedMetrics bool) *GKEColle
 	fqName := name("gke")
 	labelKeys := []string{"project", "name", "location", "version"}
 
+	ctx := context.Background()
+	containerService, err := container.NewService(ctx)
+	if err != nil {
+		log.Println(err)
+		return nil
+	}
+
 	return &GKECollector{
-		account:               account,
+		account:          account,
+		containerService: containerService,
+
 		enableExtendedMetrics: enableExtendedMetrics,
 
 		Up: prometheus.NewDesc(
@@ -64,18 +75,13 @@ func NewGKECollector(account *gcp.Account, enableExtendedMetrics bool) *GKEColle
 
 func (c *GKECollector) Collect(ch chan<- prometheus.Metric) {
 	ctx := context.Background()
-	containerService, err := container.NewService(ctx)
-	if err != nil {
-		log.Println(err)
-		return
-	}
 
 	var wg sync.WaitGroup
 	for _, p := range c.account.Projects {
 		wg.Add(1)
 		go func(p *cloudresourcemanager.Project) {
 			defer wg.Done()
-			c.collectProjectMetrics(ctx, containerService, p, ch)
+			c.collectProjectMetrics(ctx, c.containerService, p, ch)
 		}(p)
 	}
 	wg.Wait()

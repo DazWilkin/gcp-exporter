@@ -14,7 +14,8 @@ import (
 
 // StorageCollector represents Cloud Storage
 type StorageCollector struct {
-	account *gcp.Account
+	account        *gcp.Account
+	storageService *storage.Service
 
 	Buckets *prometheus.Desc
 }
@@ -22,8 +23,17 @@ type StorageCollector struct {
 // NewStorageCollector returns a StorageCollector
 func NewStorageCollector(account *gcp.Account) *StorageCollector {
 	fqName := name("storage")
+
+	ctx := context.Background()
+	storageService, err := storage.NewService(ctx)
+	if err != nil {
+		log.Println(err)
+		return nil
+	}
+
 	return &StorageCollector{
-		account: account,
+		account:        account,
+		storageService: storageService,
 
 		Buckets: prometheus.NewDesc(
 			fqName("buckets"),
@@ -40,11 +50,6 @@ func NewStorageCollector(account *gcp.Account) *StorageCollector {
 // Collect implements Prometheus' Collector inteface and is used to collect metrics
 func (c *StorageCollector) Collect(ch chan<- prometheus.Metric) {
 	ctx := context.Background()
-	storageService, err := storage.NewService(ctx)
-	if err != nil {
-		log.Println(err)
-		return
-	}
 
 	// Enumerate all of the projects
 	var wg sync.WaitGroup
@@ -53,7 +58,7 @@ func (c *StorageCollector) Collect(ch chan<- prometheus.Metric) {
 		go func(p *cloudresourcemanager.Project) {
 			defer wg.Done()
 			log.Printf("[StorageCollector] Project: %s", p.ProjectId)
-			resp, err := storageService.Buckets.List(p.ProjectId).MaxResults(500).Context(ctx).Do()
+			resp, err := c.storageService.Buckets.List(p.ProjectId).MaxResults(500).Context(ctx).Do()
 			if err != nil {
 				log.Println(err)
 				return

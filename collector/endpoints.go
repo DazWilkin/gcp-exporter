@@ -20,7 +20,8 @@ var (
 
 // EndpointsCollector represents Services Management services
 type EndpointsCollector struct {
-	account *gcp.Account
+	account                  *gcp.Account
+	servicemanagementService *servicemanagement.APIService
 
 	Services *prometheus.Desc
 }
@@ -28,8 +29,17 @@ type EndpointsCollector struct {
 // NewEndpointsCollector returns a new ServiceManagementCollector
 func NewEndpointsCollector(account *gcp.Account) *EndpointsCollector {
 	fqName := name("cloud_endpoints")
+
+	ctx := context.Background()
+	servicemanagementService, err := servicemanagement.NewService(ctx)
+	if err != nil {
+		log.Println(err)
+		return nil
+	}
+
 	return &EndpointsCollector{
-		account: account,
+		account:                  account,
+		servicemanagementService: servicemanagementService,
 
 		Services: prometheus.NewDesc(
 			fqName("services"),
@@ -44,13 +54,6 @@ func NewEndpointsCollector(account *gcp.Account) *EndpointsCollector {
 
 // Collect implements Prometheus' Collector interface and is used to collect metrics
 func (c *EndpointsCollector) Collect(ch chan<- prometheus.Metric) {
-	ctx := context.Background()
-	servicemanagementService, err := servicemanagement.NewService(ctx)
-	if err != nil {
-		log.Println(err)
-		return
-	}
-
 	// Enumerate all of the projects
 	var wg sync.WaitGroup
 	for _, p := range c.account.Projects {
@@ -62,7 +65,7 @@ func (c *EndpointsCollector) Collect(ch chan<- prometheus.Metric) {
 			// Uses Service Management API but filters by the services
 			// That have this project ID as their Producer Project ID
 			// See: https://servicemanagement.googleapis.com/v1/services
-			rqst := servicemanagementService.Services.List().ProducerProjectId(p.ProjectId)
+			rqst := c.servicemanagementService.Services.List().ProducerProjectId(p.ProjectId)
 
 			services := 0
 

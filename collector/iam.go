@@ -17,7 +17,8 @@ import (
 
 // IAMCollector represents Identity and Access Management (IAM)
 type IAMCollector struct {
-	account *gcp.Account
+	account    *gcp.Account
+	iamService *iam.Service
 
 	Up                 *prometheus.Desc
 	ServiceAccounts    *prometheus.Desc
@@ -28,8 +29,16 @@ type IAMCollector struct {
 func NewIAMCollector(account *gcp.Account) *IAMCollector {
 	fqName := name("iam")
 
+	ctx := context.Background()
+	iamService, err := iam.NewService(ctx)
+	if err != nil {
+		log.Println(err)
+		return nil
+	}
+
 	return &IAMCollector{
-		account: account,
+		account:    account,
+		iamService: iamService,
 
 		Up: prometheus.NewDesc(
 			fqName("up"),
@@ -65,10 +74,6 @@ func NewIAMCollector(account *gcp.Account) *IAMCollector {
 // Collect implements Prometheus' Collector interface and is used to collect metrics
 func (c *IAMCollector) Collect(ch chan<- prometheus.Metric) {
 	ctx := context.Background()
-	iamService, err := iam.NewService(ctx)
-	if err != nil {
-		log.Println(err)
-	}
 
 	// Enumerate all of the projects
 	var wg sync.WaitGroup
@@ -78,7 +83,7 @@ func (c *IAMCollector) Collect(ch chan<- prometheus.Metric) {
 			defer wg.Done()
 			log.Printf("IAMCollector:go] Project: %s", p.ProjectId)
 			parent := fmt.Sprintf("projects/%s", p.ProjectId)
-			resp, err := iamService.Projects.ServiceAccounts.List(parent).Context(ctx).Do()
+			resp, err := c.iamService.Projects.ServiceAccounts.List(parent).Context(ctx).Do()
 			if err != nil {
 				if e, ok := err.(*googleapi.Error); ok {
 					if e.Code == http.StatusForbidden {
@@ -111,7 +116,7 @@ func (c *IAMCollector) Collect(ch chan<- prometheus.Metric) {
 
 				// Service Account Keys within Service Account
 				name := fmt.Sprintf("projects/%s/serviceAccounts/%s", p.ProjectId, account.UniqueId)
-				resp, err := iamService.Projects.ServiceAccounts.Keys.List(name).Context(ctx).Do()
+				resp, err := c.iamService.Projects.ServiceAccounts.Keys.List(name).Context(ctx).Do()
 				if err != nil {
 					if e, ok := err.(*googleapi.Error); ok {
 						if e.Code == http.StatusForbidden {

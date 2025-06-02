@@ -21,7 +21,8 @@ var (
 
 // CloudRunCollector represents Cloud Run
 type CloudRunCollector struct {
-	account *gcp.Account
+	account         *gcp.Account
+	cloudrunService *run.APIService
 
 	Jobs     *prometheus.Desc
 	Services *prometheus.Desc
@@ -30,8 +31,17 @@ type CloudRunCollector struct {
 // NewCloudRunCollector returns a new CloudRunCollector
 func NewCloudRunCollector(account *gcp.Account) *CloudRunCollector {
 	fqName := name("cloud_run")
+
+	ctx := context.Background()
+	cloudrunService, err := run.NewService(ctx)
+	if err != nil {
+		log.Println(err)
+		return nil
+	}
+
 	return &CloudRunCollector{
-		account: account,
+		account:         account,
+		cloudrunService: cloudrunService,
 
 		Jobs: prometheus.NewDesc(
 			fqName("jobs"),
@@ -56,13 +66,6 @@ func NewCloudRunCollector(account *gcp.Account) *CloudRunCollector {
 
 // Collect implements Prometheus' Collector interface and is used to collect metrics
 func (c *CloudRunCollector) Collect(ch chan<- prometheus.Metric) {
-	ctx := context.Background()
-	cloudrunService, err := run.NewService(ctx)
-	if err != nil {
-		log.Println(err)
-		return
-	}
-
 	// Enumerate all of the projects
 	// WaitGroup is used for project Services|Jobs
 	var wg sync.WaitGroup
@@ -81,7 +84,7 @@ func (c *CloudRunCollector) Collect(ch chan<- prometheus.Metric) {
 			// https://pkg.go.dev/google.golang.org/api@v0.43.0/run/v1#ListServicesResponse
 			// https://pkg.go.dev/google.golang.org/api@v0.43.0/run/v1#ListMeta
 
-			rqst := cloudrunService.Namespaces.Services.List(parent)
+			rqst := c.cloudrunService.Namespaces.Services.List(parent)
 
 			// Do request at least once
 			cont := ""
@@ -133,7 +136,7 @@ func (c *CloudRunCollector) Collect(ch chan<- prometheus.Metric) {
 		go func(p *cloudresourcemanager.Project) {
 			defer wg.Done()
 
-			rqst := cloudrunService.Namespaces.Jobs.List(parent)
+			rqst := c.cloudrunService.Namespaces.Jobs.List(parent)
 
 			// Do request at least once
 			cont := ""

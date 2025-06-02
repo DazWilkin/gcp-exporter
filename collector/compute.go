@@ -15,7 +15,8 @@ import (
 
 // ComputeCollector represents Compute Engine
 type ComputeCollector struct {
-	account *gcp.Account
+	account        *gcp.Account
+	computeService *compute.Service
 
 	Instances       *prometheus.Desc
 	ForwardingRules *prometheus.Desc
@@ -24,8 +25,17 @@ type ComputeCollector struct {
 // NewComputeCollector returns a new ComputeCollector
 func NewComputeCollector(account *gcp.Account) *ComputeCollector {
 	fqName := name("compute_engine")
+
+	ctx := context.Background()
+	computeService, err := compute.NewService(ctx)
+	if err != nil {
+		log.Println(err)
+		return nil
+	}
+
 	return &ComputeCollector{
-		account: account,
+		account:        account,
+		computeService: computeService,
 
 		Instances: prometheus.NewDesc(
 			fqName("instances"),
@@ -51,11 +61,6 @@ func NewComputeCollector(account *gcp.Account) *ComputeCollector {
 // Collect implements Prometheus' Collector interface and is used to collect metrics
 func (c *ComputeCollector) Collect(ch chan<- prometheus.Metric) {
 	ctx := context.Background()
-	computeService, err := compute.NewService(ctx)
-	if err != nil {
-		log.Println(err)
-		return
-	}
 
 	// Enumerate all of the projects
 	var wg sync.WaitGroup
@@ -70,7 +75,7 @@ func (c *ComputeCollector) Collect(ch chan<- prometheus.Metric) {
 				defer wg.Done()
 				// Compute Engine API instances.list requires zone
 				// Must repeat the call for all possible zones
-				zoneList, err := computeService.Zones.List(p.ProjectId).Context(ctx).Do()
+				zoneList, err := c.computeService.Zones.List(p.ProjectId).Context(ctx).Do()
 				if err != nil {
 					if e, ok := err.(*googleapi.Error); ok {
 						log.Printf("[ComputeCollector] Project: %s -- Zones.List (%d)", p.ProjectId, e.Code)
@@ -81,7 +86,7 @@ func (c *ComputeCollector) Collect(ch chan<- prometheus.Metric) {
 					wg.Add(1)
 					go func(z *compute.Zone) {
 						defer wg.Done()
-						rqst := computeService.Instances.List(p.ProjectId, z.Name).MaxResults(500)
+						rqst := c.computeService.Instances.List(p.ProjectId, z.Name).MaxResults(500)
 						count := 0
 						// Page through more results
 						if err := rqst.Pages(ctx, func(page *compute.InstanceList) error {
@@ -114,7 +119,7 @@ func (c *ComputeCollector) Collect(ch chan<- prometheus.Metric) {
 				defer wg.Done()
 				// Compute Engine API forwardingrules.list requires region
 				// Must repeat call for all possible regions
-				regionList, err := computeService.Regions.List(p.ProjectId).Context(ctx).Do()
+				regionList, err := c.computeService.Regions.List(p.ProjectId).Context(ctx).Do()
 				if err != nil {
 					if e, ok := err.(*googleapi.Error); ok {
 						log.Printf("[ComputeCollector] Project: %s -- Regions.List (%d)", p.ProjectId, e.Code)
@@ -127,7 +132,7 @@ func (c *ComputeCollector) Collect(ch chan<- prometheus.Metric) {
 					wg.Add(1)
 					go func(r *compute.Region) {
 						defer wg.Done()
-						rqst := computeService.ForwardingRules.List(p.ProjectId, r.Name).MaxResults(500)
+						rqst := c.computeService.ForwardingRules.List(p.ProjectId, r.Name).MaxResults(500)
 						count := 0
 						if err := rqst.Pages(ctx, func(page *compute.ForwardingRuleList) error {
 							count += len(page.Items)

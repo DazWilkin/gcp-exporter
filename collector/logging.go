@@ -13,7 +13,8 @@ import (
 
 // LoggingCollector represents Cloud Logging
 type LoggingCollector struct {
-	account *gcp.Account
+	account        *gcp.Account
+	loggingService *logging.Service
 
 	Logs *prometheus.Desc
 }
@@ -22,8 +23,16 @@ type LoggingCollector struct {
 func NewLoggingCollector(account *gcp.Account) *LoggingCollector {
 	fqName := name("cloud_logging")
 
+	ctx := context.Background()
+	loggingService, err := logging.NewService(ctx)
+	if err != nil {
+		log.Println(err)
+		return nil
+	}
+
 	return &LoggingCollector{
-		account: account,
+		account:        account,
+		loggingService: loggingService,
 
 		Logs: prometheus.NewDesc(
 			fqName("logs"),
@@ -39,11 +48,6 @@ func NewLoggingCollector(account *gcp.Account) *LoggingCollector {
 // Collect implements Prometheus' Collector interface and is used to collect metrics
 func (c *LoggingCollector) Collect(ch chan<- prometheus.Metric) {
 	ctx := context.Background()
-	loggingService, err := logging.NewService(ctx)
-	if err != nil {
-		log.Println(err)
-		return
-	}
 
 	// Enumerate all projects
 	var wg sync.WaitGroup
@@ -58,7 +62,7 @@ func (c *LoggingCollector) Collect(ch chan<- prometheus.Metric) {
 			defer wg.Done()
 
 			count := 0
-			rqst := loggingService.Projects.Logs.List(name)
+			rqst := c.loggingService.Projects.Logs.List(name)
 			if err := rqst.Pages(ctx, func(page *logging.ListLogsResponse) error {
 				count += len(page.LogNames)
 				return nil

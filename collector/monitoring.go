@@ -15,7 +15,8 @@ import (
 
 // MonitoringCollector represents Cloud Monitoring
 type MonitoringCollector struct {
-	account *gcp.Account
+	account           *gcp.Account
+	monitoringService *monitoring.Service
 
 	AlertPolicies *prometheus.Desc
 	UptimeChecks  *prometheus.Desc
@@ -25,8 +26,16 @@ type MonitoringCollector struct {
 func NewMonitoringCollector(account *gcp.Account) *MonitoringCollector {
 	fqName := name("cloud_monitoring")
 
+	ctx := context.Background()
+	monitoringService, err := monitoring.NewService(ctx)
+	if err != nil {
+		log.Println(err)
+		return nil
+	}
+
 	return &MonitoringCollector{
-		account: account,
+		account:           account,
+		monitoringService: monitoringService,
 
 		AlertPolicies: prometheus.NewDesc(
 			fqName("alert_policies"),
@@ -50,11 +59,6 @@ func NewMonitoringCollector(account *gcp.Account) *MonitoringCollector {
 // Collect implements Prometheus' Collector interface and is used to collect metrics
 func (c *MonitoringCollector) Collect(ch chan<- prometheus.Metric) {
 	ctx := context.Background()
-	monitoringService, err := monitoring.NewService(ctx)
-	if err != nil {
-		log.Println(err)
-		return
-	}
 
 	// Enumerate all projects
 	// WaitGroup is used for project AlertPolicies|UptimeChecks
@@ -71,7 +75,7 @@ func (c *MonitoringCollector) Collect(ch chan<- prometheus.Metric) {
 
 			count := 0
 
-			rqst := monitoringService.Projects.AlertPolicies.List(name)
+			rqst := c.monitoringService.Projects.AlertPolicies.List(name)
 			if err := rqst.Pages(ctx, func(page *monitoring.ListAlertPoliciesResponse) error {
 				count += len(page.AlertPolicies)
 				return nil
@@ -99,7 +103,7 @@ func (c *MonitoringCollector) Collect(ch chan<- prometheus.Metric) {
 
 			count := 0
 
-			rqst := monitoringService.Projects.UptimeCheckConfigs.List(name)
+			rqst := c.monitoringService.Projects.UptimeCheckConfigs.List(name)
 			if err := rqst.Pages(ctx, func(page *monitoring.ListUptimeCheckConfigsResponse) error {
 				count += len(page.UptimeCheckConfigs)
 				return nil

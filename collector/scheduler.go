@@ -21,7 +21,8 @@ var (
 
 // SchedulerCollector represents Cloud Scheduler
 type SchedulerCollector struct {
-	account *gcp.Account
+	account          *gcp.Account
+	schedulerService *cloudscheduler.Service
 
 	Jobs *prometheus.Desc
 }
@@ -29,8 +30,17 @@ type SchedulerCollector struct {
 // NewSchedulerCollector returns a new SchedulerCollector
 func NewSchedulerCollector(account *gcp.Account) *SchedulerCollector {
 	fqName := name("cloud_scheduler")
+
+	ctx := context.Background()
+	schedulerService, err := cloudscheduler.NewService(ctx)
+	if err != nil {
+		log.Println(err)
+		return nil
+	}
+
 	return &SchedulerCollector{
-		account: account,
+		account:          account,
+		schedulerService: schedulerService,
 
 		Jobs: prometheus.NewDesc(
 			fqName("jobs"),
@@ -47,11 +57,6 @@ func NewSchedulerCollector(account *gcp.Account) *SchedulerCollector {
 // Collect implements Prometheus' Collector interface and is used to collect metrics
 func (c *SchedulerCollector) Collect(ch chan<- prometheus.Metric) {
 	ctx := context.Background()
-	schedulerService, err := cloudscheduler.NewService(ctx)
-	if err != nil {
-		log.Println(err)
-		return
-	}
 
 	// Enumerate all of the projects
 	var wg sync.WaitGroup
@@ -64,13 +69,13 @@ func (c *SchedulerCollector) Collect(ch chan<- prometheus.Metric) {
 			name := fmt.Sprintf("projects/%s", p.ProjectId)
 			count := 0
 
-			rqst := schedulerService.Projects.Locations.List(name)
+			rqst := c.schedulerService.Projects.Locations.List(name)
 			if err := rqst.Pages(ctx, func(page *cloudscheduler.ListLocationsResponse) error {
 				for _, l := range page.Locations {
 					log.Printf("[SchedulerCollector] Project: %s (Location: %s)", p.ProjectId, l.LocationId)
 
 					name2 := fmt.Sprintf("%s/locations/%s", name, l.LocationId)
-					rqst2 := schedulerService.Projects.Locations.Jobs.List(name2)
+					rqst2 := c.schedulerService.Projects.Locations.Jobs.List(name2)
 					if err := rqst2.Pages(ctx, func(page2 *cloudscheduler.ListJobsResponse) error {
 						// Count the number of Jobs
 						count += len(page2.Jobs)

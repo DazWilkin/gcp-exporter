@@ -11,10 +11,11 @@ import (
 
 // ProjectsCollector represents Google Cloud Platform projects
 type ProjectsCollector struct {
+	account                     *gcp.Account
+	cloudresourcemanagerService *cloudresourcemanager.Service
+
 	filter   string
 	pagesize int64
-
-	account *gcp.Account
 
 	Count *prometheus.Desc
 }
@@ -30,10 +31,19 @@ func NewProjectsCollector(account *gcp.Account, filter string, pagesize int64) *
 	filter = filter + "lifecycleState:ACTIVE"
 	log.Printf("Projects filter: '%s'", filter)
 
+	ctx := context.Background()
+	cloudresourcemanagerService, err := cloudresourcemanager.NewService(ctx)
+	if err != nil {
+		log.Fatal(err)
+		return nil
+	}
+
 	return &ProjectsCollector{
+		account:                     account,
+		cloudresourcemanagerService: cloudresourcemanagerService,
+
 		filter:   filter,
 		pagesize: pagesize,
-		account:  account,
 
 		Count: prometheus.NewDesc(
 			fqName("count"),
@@ -47,16 +57,11 @@ func NewProjectsCollector(account *gcp.Account, filter string, pagesize int64) *
 // Collect implements Prometheus' Collector interface and is used to collect metrics
 func (c *ProjectsCollector) Collect(ch chan<- prometheus.Metric) {
 	ctx := context.Background()
-	cloudresourcemanagerService, err := cloudresourcemanager.NewService(ctx)
-	if err != nil {
-		log.Fatal(err)
-		return
-	}
 
 	// Create the Projects.List request
 	// Return at most (!) '--pagesize' projects
 	// Filter the results to only include the project ID and number
-	req := cloudresourcemanagerService.Projects.List().PageSize(c.pagesize).Fields("projects.projectId", "projects.projectNumber").Filter(c.filter)
+	req := c.cloudresourcemanagerService.Projects.List().PageSize(c.pagesize).Fields("projects.projectId", "projects.projectNumber").Filter(c.filter)
 
 	projects := []*cloudresourcemanager.Project{}
 
