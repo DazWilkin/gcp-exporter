@@ -23,14 +23,14 @@ type MonitoringCollector struct {
 }
 
 // NewMonitoringCollector create a new MonitoringCollector
-func NewMonitoringCollector(account *gcp.Account) *MonitoringCollector {
-	fqName := name("cloud_monitoring")
+func NewMonitoringCollector(account *gcp.Account) (*MonitoringCollector, error) {
+	subsystem := "cloud_monitoring"
 
 	ctx := context.Background()
 	monitoringService, err := monitoring.NewService(ctx)
 	if err != nil {
 		log.Println(err)
-		return nil
+		return nil, err
 	}
 
 	return &MonitoringCollector{
@@ -38,7 +38,7 @@ func NewMonitoringCollector(account *gcp.Account) *MonitoringCollector {
 		monitoringService: monitoringService,
 
 		AlertPolicies: prometheus.NewDesc(
-			fqName("alert_policies"),
+			prometheus.BuildFQName(prefix, subsystem, "alert_policies"),
 			"Number of Alert Policies",
 			[]string{
 				"project",
@@ -46,14 +46,14 @@ func NewMonitoringCollector(account *gcp.Account) *MonitoringCollector {
 			nil,
 		),
 		UptimeChecks: prometheus.NewDesc(
-			fqName("uptime_checks"),
+			prometheus.BuildFQName(prefix, subsystem, "uptime_checks"),
 			"Number of Uptime Checks",
 			[]string{
 				"project",
 			},
 			nil,
 		),
-	}
+	}, nil
 }
 
 // Collect implements Prometheus' Collector interface and is used to collect metrics

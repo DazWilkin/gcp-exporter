@@ -23,14 +23,14 @@ type EventarcCollector struct {
 }
 
 // NewEventarcCollector creates a new EventarcCollector
-func NewEventarcCollector(account *gcp.Account) *EventarcCollector {
-	fqName := name("eventarc")
+func NewEventarcCollector(account *gcp.Account) (*EventarcCollector, error) {
+	subsystem := "eventarc"
 
 	ctx := context.Background()
 	eventarcService, err := eventarc.NewService(ctx)
 	if err != nil {
 		log.Println(err)
-		return nil
+		return nil, err
 	}
 
 	return &EventarcCollector{
@@ -38,7 +38,7 @@ func NewEventarcCollector(account *gcp.Account) *EventarcCollector {
 		eventarcService: eventarcService,
 
 		Channels: prometheus.NewDesc(
-			fqName("channels"),
+			prometheus.BuildFQName(prefix, subsystem, "channels"),
 			"1 if the channel exists",
 			[]string{
 				"project",
@@ -50,7 +50,7 @@ func NewEventarcCollector(account *gcp.Account) *EventarcCollector {
 			nil,
 		),
 		Triggers: prometheus.NewDesc(
-			fqName("triggers"),
+			prometheus.BuildFQName(prefix, subsystem, "triggers"),
 			"1 if the trigger exists",
 			[]string{
 				"project",
@@ -61,7 +61,7 @@ func NewEventarcCollector(account *gcp.Account) *EventarcCollector {
 			},
 			nil,
 		),
-	}
+	}, nil
 }
 
 // Collect implements Prometheus' Collector interface and is used to collect metrics

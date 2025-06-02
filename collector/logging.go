@@ -20,14 +20,14 @@ type LoggingCollector struct {
 }
 
 // NewLoggingCollector creates a new LoggingCollector
-func NewLoggingCollector(account *gcp.Account) *LoggingCollector {
-	fqName := name("cloud_logging")
+func NewLoggingCollector(account *gcp.Account) (*LoggingCollector, error) {
+	subsystem := "cloud_logging"
 
 	ctx := context.Background()
 	loggingService, err := logging.NewService(ctx)
 	if err != nil {
 		log.Println(err)
-		return nil
+		return nil, err
 	}
 
 	return &LoggingCollector{
@@ -35,14 +35,14 @@ func NewLoggingCollector(account *gcp.Account) *LoggingCollector {
 		loggingService: loggingService,
 
 		Logs: prometheus.NewDesc(
-			fqName("logs"),
+			prometheus.BuildFQName(prefix, subsystem, "logs"),
 			"Number of Logs",
 			[]string{
 				"project",
 			},
 			nil,
 		),
-	}
+	}, nil
 }
 
 // Collect implements Prometheus' Collector interface and is used to collect metrics

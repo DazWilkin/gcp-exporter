@@ -23,14 +23,14 @@ type ComputeCollector struct {
 }
 
 // NewComputeCollector returns a new ComputeCollector
-func NewComputeCollector(account *gcp.Account) *ComputeCollector {
-	fqName := name("compute_engine")
+func NewComputeCollector(account *gcp.Account) (*ComputeCollector, error) {
+	subsystem := "compute_engine"
 
 	ctx := context.Background()
 	computeService, err := compute.NewService(ctx)
 	if err != nil {
 		log.Println(err)
-		return nil
+		return nil, err
 	}
 
 	return &ComputeCollector{
@@ -38,7 +38,7 @@ func NewComputeCollector(account *gcp.Account) *ComputeCollector {
 		computeService: computeService,
 
 		Instances: prometheus.NewDesc(
-			fqName("instances"),
+			prometheus.BuildFQName(prefix, subsystem, "instances"),
 			"Number of instances",
 			[]string{
 				"project",
@@ -47,7 +47,7 @@ func NewComputeCollector(account *gcp.Account) *ComputeCollector {
 			nil,
 		),
 		ForwardingRules: prometheus.NewDesc(
-			fqName("forwardingrules"),
+			prometheus.BuildFQName(prefix, subsystem, "forwardingrules"),
 			"Number of forwardingrules",
 			[]string{
 				"project",
@@ -55,7 +55,7 @@ func NewComputeCollector(account *gcp.Account) *ComputeCollector {
 			},
 			nil,
 		),
-	}
+	}, nil
 }
 
 // Collect implements Prometheus' Collector interface and is used to collect metrics

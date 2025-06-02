@@ -29,14 +29,14 @@ type CloudRunCollector struct {
 }
 
 // NewCloudRunCollector returns a new CloudRunCollector
-func NewCloudRunCollector(account *gcp.Account) *CloudRunCollector {
-	fqName := name("cloud_run")
+func NewCloudRunCollector(account *gcp.Account) (*CloudRunCollector, error) {
+	subsystem := "cloud_run"
 
 	ctx := context.Background()
 	cloudrunService, err := run.NewService(ctx)
 	if err != nil {
 		log.Println(err)
-		return nil
+		return nil, err
 	}
 
 	return &CloudRunCollector{
@@ -44,7 +44,7 @@ func NewCloudRunCollector(account *gcp.Account) *CloudRunCollector {
 		cloudrunService: cloudrunService,
 
 		Jobs: prometheus.NewDesc(
-			fqName("jobs"),
+			prometheus.BuildFQName(prefix, subsystem, "jobs"),
 			"Number of Jobs",
 			[]string{
 				"project",
@@ -53,7 +53,7 @@ func NewCloudRunCollector(account *gcp.Account) *CloudRunCollector {
 			nil,
 		),
 		Services: prometheus.NewDesc(
-			fqName("services"),
+			prometheus.BuildFQName(prefix, subsystem, "services"),
 			"Number of Services",
 			[]string{
 				"project",
@@ -61,7 +61,7 @@ func NewCloudRunCollector(account *gcp.Account) *CloudRunCollector {
 			},
 			nil,
 		),
-	}
+	}, nil
 }
 
 // Collect implements Prometheus' Collector interface and is used to collect metrics

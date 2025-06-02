@@ -21,8 +21,8 @@ type ProjectsCollector struct {
 }
 
 // NewProjectsCollector returns a new ProjectsCollector
-func NewProjectsCollector(account *gcp.Account, filter string, pagesize int64) *ProjectsCollector {
-	fqName := name("projects")
+func NewProjectsCollector(account *gcp.Account, filter string, pagesize int64) (*ProjectsCollector, error) {
+	subsystem := "projects"
 
 	// Combine any user-specified filter with "lifecycleState:ACTIVE" to only process active projects
 	if filter != "" {
@@ -35,7 +35,7 @@ func NewProjectsCollector(account *gcp.Account, filter string, pagesize int64) *
 	cloudresourcemanagerService, err := cloudresourcemanager.NewService(ctx)
 	if err != nil {
 		log.Fatal(err)
-		return nil
+		return nil, err
 	}
 
 	return &ProjectsCollector{
@@ -46,12 +46,12 @@ func NewProjectsCollector(account *gcp.Account, filter string, pagesize int64) *
 		pagesize: pagesize,
 
 		Count: prometheus.NewDesc(
-			fqName("count"),
+			prometheus.BuildFQName(prefix, subsystem, "count"),
 			"Number of Projects",
 			[]string{},
 			nil,
 		),
-	}
+	}, nil
 }
 
 // Collect implements Prometheus' Collector interface and is used to collect metrics

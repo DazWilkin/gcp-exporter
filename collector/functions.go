@@ -31,14 +31,14 @@ type FunctionsCollector struct {
 }
 
 // NewFunctionsCollector returns a new FunctionsCollector
-func NewFunctionsCollector(account *gcp.Account) *FunctionsCollector {
-	fqName := name("cloud_functions")
+func NewFunctionsCollector(account *gcp.Account) (*FunctionsCollector, error) {
+	subsystem := "cloud_functions"
 
 	ctx := context.Background()
 	cloudfunctionsService, err := cloudfunctions.NewService(ctx)
 	if err != nil {
 		log.Println(err)
-		return nil
+		return nil, err
 	}
 
 	return &FunctionsCollector{
@@ -46,7 +46,7 @@ func NewFunctionsCollector(account *gcp.Account) *FunctionsCollector {
 		cloudfunctionsService: cloudfunctionsService,
 
 		Functions: prometheus.NewDesc(
-			fqName("functions"),
+			prometheus.BuildFQName(prefix, subsystem, "functions"),
 			"Number of Cloud Functions",
 			[]string{
 				"project",
@@ -54,7 +54,7 @@ func NewFunctionsCollector(account *gcp.Account) *FunctionsCollector {
 			nil,
 		),
 		Locations: prometheus.NewDesc(
-			fqName("locations"),
+			prometheus.BuildFQName(prefix, subsystem, "locations"),
 			"Number of Functions by Location",
 			[]string{
 				"project",
@@ -63,7 +63,7 @@ func NewFunctionsCollector(account *gcp.Account) *FunctionsCollector {
 			nil,
 		),
 		Runtimes: prometheus.NewDesc(
-			fqName("runtimes"),
+			prometheus.BuildFQName(prefix, subsystem, "runtimes"),
 			"Number of Functions by Runtime",
 			[]string{
 				"project",
@@ -71,7 +71,7 @@ func NewFunctionsCollector(account *gcp.Account) *FunctionsCollector {
 			},
 			nil,
 		),
-	}
+	}, nil
 }
 
 // Collect implements Prometheus' Collector interface and is used to collect metrics

@@ -21,14 +21,14 @@ type StorageCollector struct {
 }
 
 // NewStorageCollector returns a StorageCollector
-func NewStorageCollector(account *gcp.Account) *StorageCollector {
-	fqName := name("storage")
+func NewStorageCollector(account *gcp.Account) (*StorageCollector, error) {
+	subsystem := "storage"
 
 	ctx := context.Background()
 	storageService, err := storage.NewService(ctx)
 	if err != nil {
 		log.Println(err)
-		return nil
+		return nil, err
 	}
 
 	return &StorageCollector{
@@ -36,7 +36,7 @@ func NewStorageCollector(account *gcp.Account) *StorageCollector {
 		storageService: storageService,
 
 		Buckets: prometheus.NewDesc(
-			fqName("buckets"),
+			prometheus.BuildFQName(prefix, subsystem, "buckets"),
 			"Number of buckets",
 			[]string{
 				"project",
@@ -44,7 +44,7 @@ func NewStorageCollector(account *gcp.Account) *StorageCollector {
 			},
 			nil,
 		),
-	}
+	}, nil
 }
 
 // Collect implements Prometheus' Collector inteface and is used to collect metrics

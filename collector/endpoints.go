@@ -27,14 +27,14 @@ type EndpointsCollector struct {
 }
 
 // NewEndpointsCollector returns a new ServiceManagementCollector
-func NewEndpointsCollector(account *gcp.Account) *EndpointsCollector {
-	fqName := name("cloud_endpoints")
+func NewEndpointsCollector(account *gcp.Account) (*EndpointsCollector, error) {
+	subsystem := "cloud_endpoints"
 
 	ctx := context.Background()
 	servicemanagementService, err := servicemanagement.NewService(ctx)
 	if err != nil {
 		log.Println(err)
-		return nil
+		return nil, err
 	}
 
 	return &EndpointsCollector{
@@ -42,14 +42,14 @@ func NewEndpointsCollector(account *gcp.Account) *EndpointsCollector {
 		servicemanagementService: servicemanagementService,
 
 		Services: prometheus.NewDesc(
-			fqName("services"),
+			prometheus.BuildFQName(prefix, subsystem, "services"),
 			"Number of Cloud Endpoints services",
 			[]string{
 				"project",
 			},
 			nil,
 		),
-	}
+	}, nil
 }
 
 // Collect implements Prometheus' Collector interface and is used to collect metrics

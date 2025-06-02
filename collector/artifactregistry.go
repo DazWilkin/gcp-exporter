@@ -31,14 +31,14 @@ type ArtifactRegistryCollector struct {
 }
 
 // NewArtifactRegistryCollector returns a new ArtifactRegistryCollector
-func NewArtifactRegistryCollector(account *gcp.Account) *ArtifactRegistryCollector {
-	fqName := name("artifact_registry")
+func NewArtifactRegistryCollector(account *gcp.Account) (*ArtifactRegistryCollector, error) {
+	subsystem := "artifact_registry"
 
 	ctx := context.Background()
 	artifactregistryService, err := artifactregistry.NewService(ctx)
 	if err != nil {
 		log.Println(err)
-		return nil
+		return nil, err
 	}
 
 	return &ArtifactRegistryCollector{
@@ -46,7 +46,7 @@ func NewArtifactRegistryCollector(account *gcp.Account) *ArtifactRegistryCollect
 		artifactregistryService: artifactregistryService,
 
 		Registries: prometheus.NewDesc(
-			fqName("registries"),
+			prometheus.BuildFQName(prefix, subsystem, "registries"),
 			"Number of Registries",
 			[]string{
 				"project",
@@ -54,7 +54,7 @@ func NewArtifactRegistryCollector(account *gcp.Account) *ArtifactRegistryCollect
 			nil,
 		),
 		Locations: prometheus.NewDesc(
-			fqName("locations"),
+			prometheus.BuildFQName(prefix, subsystem, "locations"),
 			"Number of Locations",
 			[]string{
 				"project",
@@ -63,7 +63,7 @@ func NewArtifactRegistryCollector(account *gcp.Account) *ArtifactRegistryCollect
 			nil,
 		),
 		Formats: prometheus.NewDesc(
-			fqName("formats"),
+			prometheus.BuildFQName(prefix, subsystem, "formats"),
 			"Number of Formats",
 			[]string{
 				"project",
@@ -71,7 +71,7 @@ func NewArtifactRegistryCollector(account *gcp.Account) *ArtifactRegistryCollect
 			},
 			nil,
 		),
-	}
+	}, nil
 }
 
 // Collect implements Prometheus' Collector interface and is used to collect metrics

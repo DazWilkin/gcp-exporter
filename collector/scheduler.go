@@ -28,14 +28,14 @@ type SchedulerCollector struct {
 }
 
 // NewSchedulerCollector returns a new SchedulerCollector
-func NewSchedulerCollector(account *gcp.Account) *SchedulerCollector {
-	fqName := name("cloud_scheduler")
+func NewSchedulerCollector(account *gcp.Account) (*SchedulerCollector, error) {
+	subsystem := "cloud_scheduler"
 
 	ctx := context.Background()
 	schedulerService, err := cloudscheduler.NewService(ctx)
 	if err != nil {
 		log.Println(err)
-		return nil
+		return nil, err
 	}
 
 	return &SchedulerCollector{
@@ -43,7 +43,7 @@ func NewSchedulerCollector(account *gcp.Account) *SchedulerCollector {
 		schedulerService: schedulerService,
 
 		Jobs: prometheus.NewDesc(
-			fqName("jobs"),
+			prometheus.BuildFQName(prefix, subsystem, "jobs"),
 			"Number of Jobs",
 			[]string{
 				"project",
@@ -51,7 +51,7 @@ func NewSchedulerCollector(account *gcp.Account) *SchedulerCollector {
 			},
 			nil,
 		),
-	}
+	}, nil
 }
 
 // Collect implements Prometheus' Collector interface and is used to collect metrics

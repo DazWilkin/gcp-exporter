@@ -26,14 +26,14 @@ type IAMCollector struct {
 }
 
 // NewIAMCollector creates a new IAMCollector
-func NewIAMCollector(account *gcp.Account) *IAMCollector {
-	fqName := name("iam")
+func NewIAMCollector(account *gcp.Account) (*IAMCollector, error) {
+	subsystem := "iam"
 
 	ctx := context.Background()
 	iamService, err := iam.NewService(ctx)
 	if err != nil {
 		log.Println(err)
-		return nil
+		return nil, err
 	}
 
 	return &IAMCollector{
@@ -41,13 +41,13 @@ func NewIAMCollector(account *gcp.Account) *IAMCollector {
 		iamService: iamService,
 
 		Up: prometheus.NewDesc(
-			fqName("up"),
+			prometheus.BuildFQName(prefix, subsystem, "up"),
 			"1 if the IAM service is up, 0 otherwise",
 			nil,
 			nil,
 		),
 		ServiceAccounts: prometheus.NewDesc(
-			fqName("service_accounts"),
+			prometheus.BuildFQName(prefix, subsystem, "service_accounts"),
 			"Number of Service Accounts",
 			[]string{
 				"project",
@@ -57,7 +57,7 @@ func NewIAMCollector(account *gcp.Account) *IAMCollector {
 			nil,
 		),
 		ServiceAccountKeys: prometheus.NewDesc(
-			fqName("service_account_keys"),
+			prometheus.BuildFQName(prefix, subsystem, "service_account_keys"),
 			"Number of Service Account Keys",
 			[]string{
 				"project",
@@ -68,7 +68,7 @@ func NewIAMCollector(account *gcp.Account) *IAMCollector {
 			},
 			nil,
 		),
-	}
+	}, nil
 }
 
 // Collect implements Prometheus' Collector interface and is used to collect metrics

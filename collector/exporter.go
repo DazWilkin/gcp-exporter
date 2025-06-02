@@ -17,7 +17,7 @@ type ExporterCollector struct {
 
 // NewExporterCollector returns a new ExporterCollector.
 func NewExporterCollector(osVersion, goVersion, gitCommit string, startTime int64) *ExporterCollector {
-	fqName := name("exporter")
+	subsystem := "exporter"
 	return &ExporterCollector{
 		osVersion: osVersion,
 		goVersion: goVersion,
@@ -25,13 +25,13 @@ func NewExporterCollector(osVersion, goVersion, gitCommit string, startTime int6
 		startTime: startTime,
 
 		StartTime: prometheus.NewDesc(
-			fqName("start_time"),
+			prometheus.BuildFQName(prefix, subsystem, "start_time"),
 			"Exporter start time in Unix epoch seconds",
 			nil,
 			nil,
 		),
 		BuildInfo: prometheus.NewDesc(
-			fqName("build_info"),
+			prometheus.BuildFQName(prefix, subsystem, "build_info"),
 			"A metric with a constant '1' value labeled by OS version, Go version, and the Git commit of the exporter",
 			[]string{"os_version", "go_version", "git_commit"},
 			nil,

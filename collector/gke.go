@@ -29,15 +29,15 @@ type GKECollector struct {
 	Up            *prometheus.Desc
 }
 
-func NewGKECollector(account *gcp.Account, enableExtendedMetrics bool) *GKECollector {
-	fqName := name("gke")
+func NewGKECollector(account *gcp.Account, enableExtendedMetrics bool) (*GKECollector, error) {
+	subsystem := "gke"
 	labelKeys := []string{"project", "name", "location", "version"}
 
 	ctx := context.Background()
 	containerService, err := container.NewService(ctx)
 	if err != nil {
 		log.Println(err)
-		return nil
+		return nil, err
 	}
 
 	return &GKECollector{
@@ -47,30 +47,30 @@ func NewGKECollector(account *gcp.Account, enableExtendedMetrics bool) *GKEColle
 		enableExtendedMetrics: enableExtendedMetrics,
 
 		Up: prometheus.NewDesc(
-			fqName("up"),
+			prometheus.BuildFQName(prefix, subsystem, "up"),
 			"1 if the cluster is running, 0 otherwise",
 			labelKeys, nil,
 		),
 		Info: prometheus.NewDesc(
-			fqName("info"),
+			prometheus.BuildFQName(prefix, subsystem, "info"),
 			"Cluster control plane information. 1 if the cluster is running, 0 otherwise",
 			append(labelKeys, "id", "mode", "endpoint", "network", "subnetwork",
 				"initial_cluster_version", "node_pools_count"),
 			nil,
 		),
 		Nodes: prometheus.NewDesc(
-			fqName("nodes"),
+			prometheus.BuildFQName(prefix, subsystem, "nodes"),
 			"Number of nodes currently in the cluster",
 			labelKeys, nil,
 		),
 		NodePoolsInfo: prometheus.NewDesc(
-			fqName("node_pools_info"),
+			prometheus.BuildFQName(prefix, subsystem, "node_pools_info"),
 			"Cluster Node Pools Information. 1 if the Node Pool is running, 0 otherwise",
 			append(labelKeys, "etag", "cluster_id", "autoscaling", "disk_size_gb",
 				"disk_type", "image_type", "machine_type", "locations", "spot", "preemptible"),
 			nil,
 		),
-	}
+	}, nil
 }
 
 func (c *GKECollector) Collect(ch chan<- prometheus.Metric) {
