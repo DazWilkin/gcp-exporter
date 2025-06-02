@@ -92,6 +92,14 @@ func handleRoot(w http.ResponseWriter, _ *http.Request) {
 	}
 }
 
+func must[T prometheus.Collector](collector T, err error) T {
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	return collector
+}
+
 func main() {
 	flag.Parse()
 
@@ -123,58 +131,58 @@ func main() {
 	// ProjectCollector is a special case
 	// When it runs it replaces the Exporter's list of GCP projects
 	// The other collectors are dependent on this list of projects
-	registry.MustRegister(collector.NewProjectsCollector(account, *filter, *pagesize))
+	registry.MustRegister(must(collector.NewProjectsCollector(account, *filter, *pagesize)))
 
 	collectorConfigs := map[string]struct {
 		collector prometheus.Collector
 		disable   *bool
 	}{
 		"artifact_registry": {
-			collector.NewArtifactRegistryCollector(account),
+			must(collector.NewArtifactRegistryCollector(account)),
 			disableArtifactRegistryCollector,
 		},
 		"cloud_run": {
-			collector.NewCloudRunCollector(account),
+			must(collector.NewCloudRunCollector(account)),
 			disableCloudRunCollector,
 		},
 		"compute": {
-			collector.NewComputeCollector(account),
+			must(collector.NewComputeCollector(account)),
 			disableComputeCollector,
 		},
 		"endpoints": {
-			collector.NewEndpointsCollector(account),
+			must(collector.NewEndpointsCollector(account)),
 			disableEndpointsCollector,
 		},
 		"eventarc": {
-			collector.NewEventarcCollector(account),
+			must(collector.NewEventarcCollector(account)),
 			disableEventarcCollector,
 		},
 		"functions": {
-			collector.NewFunctionsCollector(account),
+			must(collector.NewFunctionsCollector(account)),
 			disableFunctionsCollector,
 		},
 		"iam": {
-			collector.NewIAMCollector(account),
+			must(collector.NewIAMCollector(account)),
 			disableIAMCollector,
 		},
 		"gke": {
-			collector.NewGKECollector(account, *enableExtendedMetricsGKECollector),
+			must(collector.NewGKECollector(account, *enableExtendedMetricsGKECollector)),
 			disableGKECollector,
 		},
 		"logging": {
-			collector.NewLoggingCollector(account),
+			must(collector.NewLoggingCollector(account)),
 			disableLoggingCollector,
 		},
 		"monitoring": {
-			collector.NewMonitoringCollector(account),
+			must(collector.NewMonitoringCollector(account)),
 			disableMonitoringCollector,
 		},
 		"scheduler": {
-			collector.NewSchedulerCollector(account),
+			must(collector.NewSchedulerCollector(account)),
 			disableSchedulerCollector,
 		},
 		"storage": {
-			collector.NewStorageCollector(account),
+			must(collector.NewStorageCollector(account)),
 			disableStorageCollector,
 		},
 	}
