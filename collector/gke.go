@@ -73,14 +73,14 @@ func NewGKECollector(account *gcp.Account, enableExtendedMetrics bool) (*GKEColl
 			labelKeys, nil,
 		),
 		NodePoolsInfo: prometheus.NewDesc(
-			prometheus.BuildFQName(prefix, subsystem, "node_pools_info"),
+			prometheus.BuildFQName(prefix, subsystem, "node_pool_info"),
 			"Cluster Node Pools Information. 1 if the Node Pool is running, 0 otherwise",
 			append(labelKeys, "etag", "cluster_id", "autoscaling", "disk_size_gb",
 				"disk_type", "image_type", "machine_type", "locations", "spot", "preemptible"),
 			nil,
 		),
 		NodePoolEndOfStandardSupportTimestamp: prometheus.NewDesc(
-			prometheus.BuildFQName(prefix, subsystem, "node_pools_endof_standard_support_timestamp"),
+			prometheus.BuildFQName(prefix, subsystem, "node_pool_endof_standard_support_timestamp"),
 			"Cluster Node Pools version standard support End of Life timestamp",
 			[]string{"etag", "cluster_id"},
 			nil,

@@ -296,8 +296,8 @@ Please file issues
 |`gcp_exporter_start_time`|Gauge|Exporter start time in Unix epoch seconds|
 |`gcp_gke_endof_standard_support_timestamp`|Gauge|Exports from the Cluster Control plane version's default support end date|
 |`gcp_gke_info`|Gauge|Exports detailed information from the Cluster Control Plane, including `id`, `mode`, `endpoint`, `network`, `subnetwork`, `initial_cluster_version`, and `node_pools_count`. 1 if the Cluster is running, 0 otherwise. Enabled when the `--collector.gke.extendedMetrics.enable` flag is set|
-|`gcp_gke_node_pools_endof_standard_support_timestamp`|Gauge|Exports from the Cluster Node Pools version's default support end date|
-|`gcp_gke_node_pools_info`|Gauge|Exports detailed information from the Cluster Node Pools, including `etag`, `cluster_id`, `autoscaling`, `disk_size_gb`, `disk_type`, `image_type`, `machine_type`, `locations`, `spot`, and `preemptible`. 1 if the Node Pool is running, 0 otherwise. Enabled when the `--collector.gke.extendedMetrics.enable` flag is set|
+|`gcp_gke_node_pool_endof_standard_support_timestamp`|Gauge|Exports from the Cluster Node Pools version's default support end date|
+|`gcp_gke_node_pool_info`|Gauge|Exports detailed information from the Cluster Node Pools, including `etag`, `cluster_id`, `autoscaling`, `disk_size_gb`, `disk_type`, `image_type`, `machine_type`, `locations`, `spot`, and `preemptible`. 1 if the Node Pool is running, 0 otherwise. Enabled when the `--collector.gke.extendedMetrics.enable` flag is set|
 |`gcp_gke_nodes`|Gauge|Number of nodes currently in the Cluster|
 |`gcp_gke_up`|Gauge|1 if the Cluster is running, 0 otherwise|
 |`gcp_iam_service_account_keys`|Gauge|Number of Service Account Keys|
