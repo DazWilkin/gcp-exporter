@@ -63,7 +63,7 @@ func NewGKECollector(account *gcp.Account, enableExtendedMetrics bool) (*GKEColl
 		),
 		EndOfStandardSupportTimestamp: prometheus.NewDesc(
 			prometheus.BuildFQName(prefix, subsystem, "endof_standard_support_timestamp"),
-			"Cluster control plane version standand support End of Life timestamp",
+			"Cluster control plane version standard support End of Life timestamp",
 			[]string{"cluster_id"},
 			nil,
 		),
@@ -81,7 +81,7 @@ func NewGKECollector(account *gcp.Account, enableExtendedMetrics bool) (*GKEColl
 		),
 		NodePoolEndOfStandardSupportTimestamp: prometheus.NewDesc(
 			prometheus.BuildFQName(prefix, subsystem, "node_pools_endof_standard_support_timestamp"),
-			"Cluster Node Pools version standand support End of Life timestamp",
+			"Cluster Node Pools version standard support End of Life timestamp",
 			[]string{"etag", "cluster_id"},
 			nil,
 		),
@@ -154,10 +154,10 @@ func (c *GKECollector) collectClusterExtendedMetrics(ctx context.Context, p *clo
 	if err != nil {
 		if e, ok := err.(*googleapi.Error); ok && e.Code == http.StatusForbidden {
 			log.Printf("Google API Error: %d [%s]", e.Code, e.Message)
-			return
+			continue
 		}
 		log.Println("Google API Error:", err)
-		return
+		continue
 	}
 
 	ch <- prometheus.MustNewConstMetric(c.EndOfStandardSupportTimestamp, prometheus.GaugeValue,
@@ -213,10 +213,10 @@ func (c *GKECollector) collectNodePoolExtendedMetrics(ctx context.Context, p *cl
 		if err != nil {
 			if e, ok := err.(*googleapi.Error); ok && e.Code == http.StatusForbidden {
 				log.Printf("Google API Error: %d [%s]", e.Code, e.Message)
-				return
+				continue
 			}
 			log.Println("Google API Error:", err)
-			return
+			continue
 		}
 
 		ch <- prometheus.MustNewConstMetric(c.NodePoolEndOfStandardSupportTimestamp, prometheus.GaugeValue,
