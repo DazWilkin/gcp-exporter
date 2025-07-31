@@ -27,7 +27,7 @@ type GKECollector struct {
 	EndOfStandardSupportTimestamp         *prometheus.Desc
 	Info                                  *prometheus.Desc
 	NodePoolEndOfStandardSupportTimestamp *prometheus.Desc
-	NodePoolInfo                         *prometheus.Desc
+	NodePoolInfo                          *prometheus.Desc
 	Nodes                                 *prometheus.Desc
 	Up                                    *prometheus.Desc
 }
