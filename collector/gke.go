@@ -27,7 +27,7 @@ type GKECollector struct {
 	EndOfStandardSupportTimestamp         *prometheus.Desc
 	Info                                  *prometheus.Desc
 	NodePoolEndOfStandardSupportTimestamp *prometheus.Desc
-	NodePoolsInfo                         *prometheus.Desc
+	NodePoolInfo                         *prometheus.Desc
 	Nodes                                 *prometheus.Desc
 	Up                                    *prometheus.Desc
 }
@@ -72,7 +72,7 @@ func NewGKECollector(account *gcp.Account, enableExtendedMetrics bool) (*GKEColl
 			"Number of nodes currently in the cluster",
 			labelKeys, nil,
 		),
-		NodePoolsInfo: prometheus.NewDesc(
+		NodePoolInfo: prometheus.NewDesc(
 			prometheus.BuildFQName(prefix, subsystem, "node_pool_info"),
 			"Cluster Node Pools Information. 1 if the Node Pool is running, 0 otherwise",
 			append(labelKeys, "etag", "cluster_id", "autoscaling", "disk_size_gb",
@@ -197,7 +197,7 @@ func (c *GKECollector) collectNodePoolExtendedMetrics(ctx context.Context, p *cl
 
 		boolToString := func(b bool) string { return strconv.FormatBool(b) }
 
-		ch <- prometheus.MustNewConstMetric(c.NodePoolsInfo, prometheus.GaugeValue, nodePoolStatus,
+		ch <- prometheus.MustNewConstMetric(c.NodePoolInfo, prometheus.GaugeValue, nodePoolStatus,
 			p.ProjectId, nodePool.Name, cluster.Location, nodePool.Version, nodePool.Etag, cluster.Id,
 			boolToString(nodePollAutoScaling),
 			strconv.FormatInt(nodePool.Config.DiskSizeGb, 10), nodePool.Config.DiskType,
@@ -228,7 +228,7 @@ func (c *GKECollector) Describe(ch chan<- *prometheus.Desc) {
 	ch <- c.EndOfStandardSupportTimestamp
 	ch <- c.Info
 	ch <- c.NodePoolEndOfStandardSupportTimestamp
-	ch <- c.NodePoolsInfo
+	ch <- c.NodePoolInfo
 	ch <- c.Nodes
 	ch <- c.Up
 }
