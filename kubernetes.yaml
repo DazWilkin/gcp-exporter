@@ -33,7 +33,7 @@ items:
         spec:
           containers:
             - name: gcp-exporter
-              image: ghcr.io/dazwilkin/gcp-exporter:c6f89106dff839d2fe23040bed05c49d9d6d27b4
+              image: ghcr.io/dazwilkin/gcp-exporter:8b352ba07bc2fd5f3ae99ce9007de9710e165246
               env:
                 - name: GOOGLE_APPLICATION_CREDENTIALS
                   value: /secrets/client_secrets.json
