@@ -257,6 +257,10 @@ Usage of gcp-exporter:
       Disables the metrics collector for Cloud Logging
   --collector.monitoring.disable
       Disables the metrics collector for Cloud Monitoring
+  --collector.pubsub.disable
+      Disables the metrics collector for Cloud Pub/Sub
+  --collector.pubsub.endpoint
+      The endpoint of the Pub/Sub service or emulator
   --collector.scheduler.disable
       Disables the metrics collector for Cloud Scheduler
   --collector.storage.disable
@@ -300,6 +304,11 @@ Please file issues
 |`gcp_gke_node_pools_info`|Gauge|Exports detailed information from the Cluster Node Pools, including `etag`, `cluster_id`, `autoscaling`, `disk_size_gb`, `disk_type`, `image_type`, `machine_type`, `locations`, `spot`, and `preemptible`. 1 if the Node Pool is running, 0 otherwise. Enabled when the `--collector.gke.extendedMetrics.enable` flag is set|
 |`gcp_gke_nodes`|Gauge|Number of nodes currently in the Cluster|
 |`gcp_gke_up`|Gauge|1 if the Cluster is running, 0 otherwise|
+|`gcp_pubsub_schemas`|Gauge|Number of Pub/Sub Schemas|
+|`gcp_pubsub_snapshots`|Gauge|Number of Pub/Sub Snapshots|
+|`gcp_pubsub_subscriptions`|Gauge|Number of Pub/Sub Subscriptions|
+|`gcp_pubsub_topics`|Gauge|Number of Pub/Sub Topics|
+
 |`gcp_storage_buckets`|Gauge|Number of buckets|
 
 ## Prometheus API
@@ -331,6 +340,10 @@ gcp_gke_cluster_info
 gcp_gke_cluster_node_pools_info
 gcp_gke_cluster_nodes
 gcp_gke_cluster_up
+gcp_pubsub_schemas
+gcp_pubsub_snapshots
+gcp_pubsub_subscriptions
+gcp_pubsub_topics
 gcp_projects_count
 gcp_storage_buckets
 ```

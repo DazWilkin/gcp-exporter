@@ -46,8 +46,11 @@ var (
 	disableGKECollector              = flag.Bool("collector.gke.disable", false, "Disables the metrics collector for Google Kubernetes Engine (GKE)")
 	disableLoggingCollector          = flag.Bool("collector.logging.disable", false, "Disables the metrics collector for Cloud Logging")
 	disableMonitoringCollector       = flag.Bool("collector.monitoring.disable", false, "Disables the metrics collector for Cloud Monitoring")
+	disablePubSubCollector           = flag.Bool("collector.pubsub.disable", false, "Disables the metrics collector for Cloud Pub/Sub")
 	disableSchedulerCollector        = flag.Bool("collector.scheduler.disable", false, "Disables the metrics collector for Cloud Scheduler")
 	disableStorageCollector          = flag.Bool("collector.storage.disable", false, "Disables the metrics collector for Cloud Storage")
+
+	endpointPubSub = flag.String("collector.pubsub.endpoint", "", "The endpoint of the Pub/Sub service or emulator")
 
 	enableExtendedMetricsGKECollector = flag.Bool("collector.gke.extendedMetrics.enable", false, "Enable the metrics collector for Google Kubernetes Engine (GKE) to collect ControlPlane and NodePool metrics")
 )
@@ -122,6 +125,10 @@ func main() {
 		}()
 	}
 
+	if *endpointPubSub != "" {
+		log.Printf("[main] Using Pub/Sub emulator (%s)", *endpointPubSub)
+	}
+
 	// Objects that holds GCP-specific resources (e.g. projects)
 	account := gcp.NewAccount()
 
@@ -176,6 +183,10 @@ func main() {
 		"monitoring": {
 			must(collector.NewMonitoringCollector(account)),
 			disableMonitoringCollector,
+		},
+		"pubsub": {
+			must(collector.NewPubSubCollector(account, *endpointPubSub)),
+			disablePubSubCollector,
 		},
 		"scheduler": {
 			must(collector.NewSchedulerCollector(account)),
