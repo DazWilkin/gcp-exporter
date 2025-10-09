@@ -63,7 +63,7 @@ services:
       - 9093:9093
 
   gcp-exporter:
-    image: ghcr.io/dazwilkin/gcp-exporter:793e4e934353d76fbd6a1ecea61585012ce3e836
+    image: ghcr.io/dazwilkin/gcp-exporter:8be6ca3335fe44fe5326154a3045c13ef62d2632
     container_name: gcp-exporter
     environment:
       - GOOGLE_APPLICATION_CREDENTIALS=/secrets/client_secrets.json
