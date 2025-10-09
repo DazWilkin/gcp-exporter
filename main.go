@@ -95,7 +95,7 @@ func handleRoot(w http.ResponseWriter, _ *http.Request) {
 	}
 }
 
-func must[T prometheus.Collector](collector T, err error) T {
+func must(collector prometheus.Collector, err error) prometheus.Collector {
 	if err != nil {
 		log.Fatal(err)
 	}
