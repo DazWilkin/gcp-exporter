@@ -9,7 +9,7 @@ on:
       - '**.jsonnet'
       - '**.key'
       - '**.pub'
-      - '**.sh'      
+      - '**.sh'
 jobs:
   golangci:
     name: lint
@@ -27,6 +27,7 @@ jobs:
           version: latest
   gcp-exporter:
     name: gcp-exporter
+    needs: golangci
     runs-on: ubuntu-latest
     env:
       REPO: dazwilkin/gcp-exporter
