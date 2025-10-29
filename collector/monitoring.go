@@ -19,6 +19,7 @@ type MonitoringCollector struct {
 	monitoringService *monitoring.Service
 
 	AlertPolicies *prometheus.Desc
+	Alerts        *prometheus.Desc
 	UptimeChecks  *prometheus.Desc
 }
 
@@ -45,6 +46,14 @@ func NewMonitoringCollector(account *gcp.Account) (*MonitoringCollector, error) 
 			},
 			nil,
 		),
+		Alerts: prometheus.NewDesc(
+			prometheus.BuildFQName(prefix, subsystem, "alerts"),
+			"Number of Alerts",
+			[]string{
+				"project",
+			},
+			nil,
+		),
 		UptimeChecks: prometheus.NewDesc(
 			prometheus.BuildFQName(prefix, subsystem, "uptime_checks"),
 			"Number of Uptime Checks",
@@ -66,67 +75,104 @@ func (c *MonitoringCollector) Collect(ch chan<- prometheus.Metric) {
 	for _, p := range c.account.Projects {
 		log.Printf("[MonitoringCollector] Project: %s", p.ProjectId)
 
-		name := fmt.Sprintf("projects/%s", p.ProjectId)
+		parent := fmt.Sprintf("projects/%s", p.ProjectId)
 
-		// Alert Policies
-		wg.Add(1)
-		go func(project string) {
-			defer wg.Done()
-
-			count := 0
-
-			rqst := c.monitoringService.Projects.AlertPolicies.List(name)
-			if err := rqst.Pages(ctx, func(page *monitoring.ListAlertPoliciesResponse) error {
-				count += len(page.AlertPolicies)
-				return nil
-			}); err != nil {
-				log.Println(err)
-				return
-			}
-
-			if count != 0 {
-				ch <- prometheus.MustNewConstMetric(
-					c.AlertPolicies,
-					prometheus.GaugeValue,
-					float64(count),
-					[]string{
-						project,
-					}...,
-				)
-			}
-		}(p.ProjectId)
-
-		// Uptime Checks
-		wg.Add(1)
-		go func(project string) {
-			defer wg.Done()
-
-			count := 0
-
-			rqst := c.monitoringService.Projects.UptimeCheckConfigs.List(name)
-			if err := rqst.Pages(ctx, func(page *monitoring.ListUptimeCheckConfigsResponse) error {
-				count += len(page.UptimeCheckConfigs)
-				return nil
-			}); err != nil {
-				log.Println(err)
-				return
-			}
-
-			if count != 0 {
-				ch <- prometheus.MustNewConstMetric(
-					c.UptimeChecks,
-					prometheus.GaugeValue,
-					float64(count),
-					[]string{
-						project,
-					}...,
-				)
-			}
-		}(p.ProjectId)
-
+		c.collectAlertPolicies(ctx, &wg, ch, parent, p.ProjectId)
+		c.collectAlerts(ctx, &wg, ch, parent, p.ProjectId)
+		c.collectUptimeChecks(ctx, &wg, ch, parent, p.ProjectId)
 	}
 	// Wait for all projects to process
 	wg.Wait()
+}
+
+// collectAlertPolicies collects alert policy metrics
+func (c *MonitoringCollector) collectAlertPolicies(ctx context.Context, wg *sync.WaitGroup, ch chan<- prometheus.Metric, parent, projectID string) {
+	wg.Add(1)
+	go func(project string) {
+		defer wg.Done()
+
+		count := 0
+
+		rqst := c.monitoringService.Projects.AlertPolicies.List(parent)
+		if err := rqst.Pages(ctx, func(page *monitoring.ListAlertPoliciesResponse) error {
+			count += len(page.AlertPolicies)
+			return nil
+		}); err != nil {
+			log.Println(err)
+			return
+		}
+
+		if count != 0 {
+			ch <- prometheus.MustNewConstMetric(
+				c.AlertPolicies,
+				prometheus.GaugeValue,
+				float64(count),
+				[]string{
+					project,
+				}...,
+			)
+		}
+	}(projectID)
+}
+
+// collectAlerts collects alert metrics
+func (c *MonitoringCollector) collectAlerts(ctx context.Context, wg *sync.WaitGroup, ch chan<- prometheus.Metric, parent, projectID string) {
+	wg.Add(1)
+	go func(project string) {
+		defer wg.Done()
+
+		count := 0
+
+		rqst := c.monitoringService.Projects.Alerts.List(parent)
+		if err := rqst.Pages(ctx, func(page *monitoring.ListAlertsResponse) error {
+			count += len(page.Alerts)
+			return nil
+		}); err != nil {
+			log.Println(err)
+			return
+		}
+
+		if count != 0 {
+			ch <- prometheus.MustNewConstMetric(
+				c.Alerts,
+				prometheus.GaugeValue,
+				float64(count),
+				[]string{
+					project,
+				}...,
+			)
+		}
+	}(projectID)
+}
+
+// collectUptimeChecks collects uptime check metrics
+func (c *MonitoringCollector) collectUptimeChecks(ctx context.Context, wg *sync.WaitGroup, ch chan<- prometheus.Metric, parent, projectID string) {
+	wg.Add(1)
+	go func(project string) {
+		defer wg.Done()
+
+		count := 0
+
+		rqst := c.monitoringService.Projects.UptimeCheckConfigs.List(parent)
+		if err := rqst.Pages(ctx, func(page *monitoring.ListUptimeCheckConfigsResponse) error {
+			count += len(page.UptimeCheckConfigs)
+			return nil
+		}); err != nil {
+			log.Println(err)
+			return
+		}
+
+		if count != 0 {
+			ch <- prometheus.MustNewConstMetric(
+				c.UptimeChecks,
+				prometheus.GaugeValue,
+				float64(count),
+				[]string{
+					project,
+				}...,
+			)
+		}
+	}(projectID)
 }
 
 // Describe implements Prometheus' Collector interface and is used to describe metrics
