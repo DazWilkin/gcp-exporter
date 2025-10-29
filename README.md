@@ -290,6 +290,7 @@ Please file issues
 |`gcp_cloud_functions_runtimes`| Gauge| Number of Cloud Functions runtimes|
 |`gcp_cloud_logging_logs`| Gauge| Number of Cloud Logging Logs|
 |`gcp_cloud_monitoring_alert_policies`|Gauge|Number of Cloud Monitoring Alert Policies|
+|`gcp_cloud_monitoring_alerts`|Gauge|Number of Cloud Monitoring Alerts|
 |`gcp_cloud_monitoring_uptime_checks`|Gauge|Number of Cloud Monitoring Uptime Checks|
 |`gcp_cloud_run_jobs`|Gauge|Number of Cloud Run jobs|
 |`gcp_cloud_run_services`|Gauge|Number of Cloud Run services|
@@ -331,11 +332,17 @@ gcp_cloud_functions_functions
 gcp_cloud_functions_locations
 gcp_cloud_functions_runtimes
 gcp_cloud_logging_logs
+gcp_cloud_monitoring_alert_policies
+gcp_cloud_monitoring_alerts
+gcp_cloud_monitoring_uptime_checks
+gcp_cloud_run_jobs
 gcp_cloud_run_services
 gcp_compute_engine_forwardingrules
 gcp_compute_engine_instances
 gcp_exporter_build_info
 gcp_exporter_start_time
+gcp_iam_service_account_keys
+gcp_iam_service_accounts
 gcp_gke_cluster_info
 gcp_gke_cluster_node_pools_info
 gcp_gke_cluster_nodes
