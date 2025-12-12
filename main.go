@@ -57,18 +57,19 @@ var (
 
 const (
 	rootTemplate = `<!DOCTYPE html>
-	<html>
-	<head>
-		<title>GCP Exporter</title>
-	</head>
-	<body>
-		<h2>Google Cloud Platform Resources Exporter</h2>
-		<ul>
-			<li><a href="{{.MetricsPath}}">metrics</a></li>
-			<li><a href="/healthz">healthz</a></li>
-		</ul>
-	<body>
-	</html>`
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>GCP Exporter</title>
+</head>
+<body>
+	<h2>Google Cloud Platform Resources Exporter</h2>
+	<ul>
+		<li><a href="{{.MetricsPath}}">metrics</a></li>
+		<li><a href="/healthz">healthz</a></li>
+	</ul>
+<body>
+</html>`
 )
 
 func handleHealthz(w http.ResponseWriter, _ *http.Request) {
