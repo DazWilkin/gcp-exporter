@@ -51,13 +51,15 @@ jobs:
         uses: docker/build-push-action@v6
         with:
           context: .
-          platforms: linux/amd64,linux/arm/v7,linux/arm64
+          platforms: linux/amd64,linux/arm64
           file: ./Dockerfile
           build-args: |
             VERSION=${{ env.VERSION }}
             COMMIT=${{ github.sha }}
           tags: ghcr.io/${{ env.REPO }}:${{ github.sha }}
           push: true
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
       - name: Install Cosign
         uses: sigstore/cosign-installer@main
       - name: Write signing key to disk (only needed for `cosign sign --key`)
